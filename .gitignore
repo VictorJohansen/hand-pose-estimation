@@ -1,8 +1,9 @@
 # Virtual environment
 venv/
 
-# Data (store filer)
-data/
+# Data (store files, keep folder structure)
+data/*
+!data/.gitkeep
 
 # Python cache
 __pycache__/
