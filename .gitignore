@@ -15,3 +15,6 @@ __pycache__/
 # OS filer
 .DS_Store
 Thumbs.db
+
+# JetBrains project settings
+.idea/
