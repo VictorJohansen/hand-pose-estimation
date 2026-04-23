@@ -5,6 +5,16 @@ venv/
 data/*
 !data/.gitkeep
 
+# Generated project outputs
+models/*
+!models/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+logs/*
+!logs/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+
 # Python cache
 __pycache__/
 *.pyc
