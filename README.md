@@ -1,5 +1,7 @@
 # hand-pose-estimation
 
+DAT255 semester project for 2D hand keypoint estimation on the FreiHAND dataset.
+
 ## Getting started
 
 - [Building and running](docs/building-and-running.md)

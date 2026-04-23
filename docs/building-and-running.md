@@ -1,12 +1,9 @@
 # Building and running
 
-## Python
+## Setup
 
-Use Python `3.12`.
-
-## Environment setup
-
-Create a project-local `.venv/` from the repository root.
+Use Python `3.12` and create a project-local `.venv/` from the repository
+root.
 
 macOS or Linux:
 
@@ -26,7 +23,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Dependency files
+## Dependencies
 
 - `requirements.txt` installs the default development setup.
 - `requirements/base.txt` contains the core runtime and training dependencies.
@@ -36,3 +33,16 @@ python -m pip install -r requirements.txt
 
 - Download the [FreiHAND dataset](https://lmb.informatik.uni-freiburg.de/resources/datasets/FreihandDataset.en.html)
 - Unzip and place `FreiHAND_pub_v2` in `hand-pose-estimation/data/`
+- The default loader path is `data/FreiHAND_pub_v2/`
+- `src/data/freihand.py` also accepts a parent path and normalizes it to the dataset root when possible
+
+Check that the dataset is visible to the loader:
+
+```bash
+python -c "from src.data.freihand import FreiHand; dataset = FreiHand(); dataset.validate(); print(f'Dataset visible: {dataset.root}')"
+```
+
+## Notebooks
+
+- Open `notebooks/test_setup.ipynb` first for a quick setup check.
+- Use `notebooks/explore_dataset.ipynb` for additional dataset inspection.
