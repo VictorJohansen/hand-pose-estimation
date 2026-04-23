@@ -24,4 +24,4 @@ evaluation, and report generation stay reproducible.
 
 The directories are kept in Git with `.gitkeep` files, but generated contents
 inside them are ignored. Commit only small, intentional artifacts needed to
-understand or reproduce the final report.
+understand or reproduce results in the final report.
