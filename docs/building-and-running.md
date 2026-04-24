@@ -31,8 +31,6 @@ python -m pip install -r requirements.txt
 
 ## Dataset
 
-- Download the [FreiHAND dataset](https://lmb.informatik.uni-freiburg.de/resources/datasets/FreihandDataset.en.html)
-- Unzip and place `FreiHAND_pub_v2` in `hand-pose-estimation/data/`
 - The default loader path is `data/FreiHAND_pub_v2/`
 - `src/data/freihand.py` also accepts a parent path and normalizes it to the dataset root when possible
 
@@ -53,6 +51,11 @@ curl.exe -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2
 Expand-Archive -Path $env:TEMP/FreiHAND_pub_v2.zip -DestinationPath data/FreiHAND_pub_v2 -Force
 Remove-Item $env:TEMP/FreiHAND_pub_v2.zip
 ```
+
+Manual alternative:
+
+- Download the [FreiHAND dataset](https://lmb.informatik.uni-freiburg.de/resources/datasets/FreihandDataset.en.html)
+- Unzip it into `hand-pose-estimation/data/FreiHAND_pub_v2/`
 
 Check that the dataset is visible to the loader:
 
