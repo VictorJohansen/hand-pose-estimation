@@ -62,6 +62,41 @@ Check that the dataset is visible to the loader:
 python -c "from src.data.freihand import FreiHand; dataset = FreiHand(); dataset.validate(); print(f'Dataset visible: {dataset.root}')"
 ```
 
+### Evaluation set
+
+The FreiHAND authors publicly released ground-truth annotations for the evaluation set. It is used for final test-set evaluation.
+
+Download and unzip into the same `data/FreiHAND_pub_v2/` directory (`~724 MB`):
+
+macOS or Linux:
+
+```bash
+curl -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2_eval.zip -o /tmp/FreiHAND_pub_v2_eval.zip && unzip -qj /tmp/FreiHAND_pub_v2_eval.zip "*/evaluation_xyz.json" -d data/FreiHAND_pub_v2 && rm /tmp/FreiHAND_pub_v2_eval.zip
+```
+
+Windows PowerShell:
+
+```powershell
+curl.exe -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2_eval.zip -o $env:TEMP/FreiHAND_pub_v2_eval.zip
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead("$env:TEMP/FreiHAND_pub_v2_eval.zip")
+$entry = $zip.Entries | Where-Object { $_.Name -eq "evaluation_xyz.json" }
+[System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, "data/FreiHAND_pub_v2/evaluation_xyz.json", $true)
+$zip.Dispose()
+Remove-Item $env:TEMP/FreiHAND_pub_v2_eval.zip
+```
+
+Manual alternative:
+
+- Download the [FreiHAND dataset](https://lmb.informatik.uni-freiburg.de/resources/datasets/FreihandDataset.en.html)
+- Extract only `evaluation_xyz.json` from the zip into `hand-pose-estimation/data/FreiHAND_pub_v2/`
+
+Check that the evaluation set is visible:
+
+```bash
+python -c "from src.data.freihand import FreiHand; dataset = FreiHand(split='eval'); dataset.validate(); print('Evaluation set visible')"
+```
+
 ## Notebooks
 
 - Open `notebooks/explore_dataset.ipynb` for a setup test and dataset visualization.

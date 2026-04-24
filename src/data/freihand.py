@@ -13,12 +13,18 @@ from PIL import Image
 
 
 VariantName = Literal["gs", "hom", "sample", "auto"]
+SplitName = Literal["train", "eval"]
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = PROJECT_ROOT / "data" / "FreiHAND_pub_v2"
 TRAINING_SAMPLE_COUNT = 32560
+EVAL_SAMPLE_COUNT = 3960
 IMAGE_SIZE = (224, 224)
 VARIANTS: tuple[VariantName, ...] = ("gs", "hom", "sample", "auto")
+
+# Canonical split parameters — all experiments must use these values.
+SPLIT_SEED = 42
+SPLIT_VALIDATION_FRACTION = 0.1
 HAND_CONNECTIONS: tuple[tuple[int, int], ...] = (
     (0, 1),
     (1, 2),
@@ -76,19 +82,19 @@ def _normalize_image_size(image_size: int | Sequence[int] | None) -> tuple[int, 
     return height, width
 
 
-def _normalize_indices(indices: slice | Iterable[int] | None) -> np.ndarray:
+def _normalize_indices(indices: slice | Iterable[int] | None, count: int = TRAINING_SAMPLE_COUNT) -> np.ndarray:
     if indices is None:
-        return np.arange(TRAINING_SAMPLE_COUNT, dtype=np.int32)
+        return np.arange(count, dtype=np.int32)
     if isinstance(indices, slice):
-        return np.arange(TRAINING_SAMPLE_COUNT, dtype=np.int32)[indices]
+        return np.arange(count, dtype=np.int32)[indices]
 
     normalized = np.asarray(list(indices), dtype=np.int32)
     if normalized.ndim != 1:
         raise ValueError("indices must be one-dimensional.")
     if normalized.size == 0:
         return normalized
-    if normalized.min() < 0 or normalized.max() >= TRAINING_SAMPLE_COUNT:
-        raise IndexError(f"indices must be between 0 and {TRAINING_SAMPLE_COUNT - 1}.")
+    if normalized.min() < 0 or normalized.max() >= count:
+        raise IndexError(f"indices must be between 0 and {count - 1}.")
     return normalized
 
 
@@ -126,6 +132,7 @@ class FreiHandSample:
 @dataclass(slots=True)
 class FreiHand:
     root: str | Path | None = None
+    split: SplitName = "train"
     _cache: dict[str, np.ndarray] = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -133,29 +140,41 @@ class FreiHand:
 
     @property
     def sample_count(self) -> int:
-        return TRAINING_SAMPLE_COUNT
+        return TRAINING_SAMPLE_COUNT if self.split == "train" else EVAL_SAMPLE_COUNT
 
     @property
     def variants(self) -> tuple[VariantName, ...]:
         return VARIANTS
 
     def validate(self) -> None:
-        required_paths = (
-            self.root,
-            self.root / "training" / "rgb",
-            self.root / "training_K.json",
-            self.root / "training_xyz.json",
-        )
+        if self.split == "train":
+            required_paths = (
+                self.root,
+                self.root / "training" / "rgb",
+                self.root / "training_K.json",
+                self.root / "training_xyz.json",
+            )
+        else:
+            required_paths = (
+                self.root,
+                self.root / "evaluation" / "rgb",
+                self.root / "evaluation_K.json",
+                self.root / "evaluation_xyz.json",
+            )
         missing = [str(path) for path in required_paths if not path.exists()]
         if missing:
             raise FileNotFoundError("FreiHAND dataset is missing required paths:\n" + "\n".join(missing))
 
     def map_image_id(self, sample_id: int, variant: VariantName = "gs") -> int:
         self._validate_sample_id(sample_id)
+        if self.split == "eval":
+            return sample_id
         variant_name = _normalize_variants(variant)[0]
         return sample_id + TRAINING_SAMPLE_COUNT * VARIANTS.index(variant_name)
 
     def image_path(self, sample_id: int, variant: VariantName = "gs") -> Path:
+        if self.split == "eval":
+            return self.root / "evaluation" / "rgb" / f"{sample_id:08d}.jpg"
         return self.root / "training" / "rgb" / f"{self.map_image_id(sample_id, variant):08d}.jpg"
 
     def sample(
@@ -189,7 +208,7 @@ class FreiHand:
         normalize_images: bool = True,
         flatten_keypoints: bool = False,
     ) -> tuple[np.ndarray, np.ndarray]:
-        sample_ids = _normalize_indices(indices)
+        sample_ids = _normalize_indices(indices, self.sample_count)
         selected_variants = _normalize_variants(variants)
         if sample_ids.size == 0:
             raise ValueError("No samples selected.")
@@ -248,7 +267,7 @@ class FreiHand:
         flatten_keypoints: bool = False,
         drop_remainder: bool = False,
     ) -> tf.data.Dataset:
-        sample_ids = _normalize_indices(indices)
+        sample_ids = _normalize_indices(indices, self.sample_count)
         selected_variants = _normalize_variants(variants)
         if sample_ids.size == 0:
             raise ValueError("No samples selected.")
@@ -280,10 +299,12 @@ class FreiHand:
     def train_validation_split(
         self,
         *,
-        validation_fraction: float = 0.1,
+        validation_fraction: float = SPLIT_VALIDATION_FRACTION,
         shuffle: bool = True,
-        seed: int = 42,
+        seed: int = SPLIT_SEED,
     ) -> tuple[np.ndarray, np.ndarray]:
+        if self.split != "train":
+            raise ValueError("train_validation_split is only available for the training split.")
         if not 0.0 < validation_fraction < 1.0:
             raise ValueError("validation_fraction must be between 0 and 1.")
 
@@ -324,8 +345,12 @@ class FreiHand:
     @property
     def _uv(self) -> np.ndarray:
         if "uv" not in self._cache:
-            intrinsics = self._load_json_array("training_K.json")
-            xyz = self._load_json_array("training_xyz.json")
+            if self.split == "train":
+                intrinsics = self._load_json_array("training_K.json")
+                xyz = self._load_json_array("training_xyz.json")
+            else:
+                intrinsics = self._load_json_array("evaluation_K.json")
+                xyz = self._load_json_array("evaluation_xyz.json")
             self._cache["uv"] = _project_keypoints(xyz, intrinsics).astype(np.float32)
         return self._cache["uv"]
 
@@ -345,8 +370,9 @@ class FreiHand:
         return array
 
     def _validate_sample_id(self, sample_id: int) -> None:
-        if not 0 <= sample_id < TRAINING_SAMPLE_COUNT:
-            raise IndexError(f"sample_id must be between 0 and {TRAINING_SAMPLE_COUNT - 1}.")
+        count = self.sample_count
+        if not 0 <= sample_id < count:
+            raise IndexError(f"sample_id must be between 0 and {count - 1}.")
 
     def _load_image(
         self,
@@ -425,7 +451,7 @@ class FreiHandSequence(keras.utils.Sequence):
             raise ValueError("batch_size must be positive.")
 
         self.dataset = dataset
-        self.sample_ids = _normalize_indices(indices)
+        self.sample_ids = _normalize_indices(indices, dataset.sample_count)
         self.variants = _normalize_variants(variants)
         if self.sample_ids.size == 0:
             raise ValueError("No samples selected.")
@@ -470,8 +496,13 @@ __all__ = [
     "FreiHand",
     "FreiHandSample",
     "FreiHandSequence",
+    "EVAL_SAMPLE_COUNT",
     "HAND_CONNECTIONS",
     "IMAGE_SIZE",
+    "SPLIT_SEED",
+    "SPLIT_VALIDATION_FRACTION",
     "TRAINING_SAMPLE_COUNT",
     "VARIANTS",
+    "SplitName",
+    "VariantName",
 ]
