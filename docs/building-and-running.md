@@ -32,7 +32,6 @@ python -m pip install -r requirements.txt
 ## Dataset
 
 - The default loader path is `data/FreiHAND_pub_v2/`
-- `src/data/freihand.py` also accepts a parent path and normalizes it to the dataset root when possible
 
 Install the training dataset directly into the expected location
 (`~3.9 GB` download):
