@@ -64,5 +64,4 @@ python -c "from src.data.freihand import FreiHand; dataset = FreiHand(); dataset
 
 ## Notebooks
 
-- Open `notebooks/test_setup.ipynb` first for a quick setup check.
-- Use `notebooks/explore_dataset.ipynb` for additional dataset inspection.
+- Open `notebooks/explore_dataset.ipynb` for a setup test and dataset visualization.
