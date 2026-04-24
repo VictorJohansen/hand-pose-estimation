@@ -36,6 +36,24 @@ python -m pip install -r requirements.txt
 - The default loader path is `data/FreiHAND_pub_v2/`
 - `src/data/freihand.py` also accepts a parent path and normalizes it to the dataset root when possible
 
+Install the training dataset directly into the expected location
+(`~3.9 GB` download):
+
+macOS or Linux:
+
+```bash
+mkdir -p data/FreiHAND_pub_v2 && curl -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2.zip -o /tmp/FreiHAND_pub_v2.zip && unzip -q /tmp/FreiHAND_pub_v2.zip -d data/FreiHAND_pub_v2 && rm /tmp/FreiHAND_pub_v2.zip
+```
+
+Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force data/FreiHAND_pub_v2 | Out-Null
+curl.exe -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2.zip -o $env:TEMP/FreiHAND_pub_v2.zip
+Expand-Archive -Path $env:TEMP/FreiHAND_pub_v2.zip -DestinationPath data/FreiHAND_pub_v2 -Force
+Remove-Item $env:TEMP/FreiHAND_pub_v2.zip
+```
+
 Check that the dataset is visible to the loader:
 
 ```bash
