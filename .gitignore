@@ -23,6 +23,9 @@ __pycache__/
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
 
+# Local scratch notebooks
+notebooks/cnn-regressor-test.ipynb
+
 # OS filer
 .DS_Store
 Thumbs.db
