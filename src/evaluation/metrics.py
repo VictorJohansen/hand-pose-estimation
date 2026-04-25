@@ -35,7 +35,7 @@ def _normalize_keypoints(array: np.ndarray, num_keypoints: int) -> np.ndarray:
     return array
 
 
-def per_sample_per_keypoint_error(
+def keypoint_errors(
     predicted: np.ndarray,
     ground_truth: np.ndarray,
     *,
@@ -54,7 +54,7 @@ def per_sample_per_keypoint_error(
     return np.linalg.norm(predicted - ground_truth, axis=-1)
 
 
-def mean_per_keypoint_error(
+def mpke(
     predicted: np.ndarray,
     ground_truth: np.ndarray,
     *,
@@ -64,13 +64,13 @@ def mean_per_keypoint_error(
 
     Single scalar in pixels. Lower is better.
     """
-    errors = per_sample_per_keypoint_error(
+    errors = keypoint_errors(
         predicted, ground_truth, num_keypoints=num_keypoints
     )
     return float(errors.mean())
 
 
-def per_sample_mpke(
+def sample_mpke(
     predicted: np.ndarray,
     ground_truth: np.ndarray,
     *,
@@ -81,13 +81,13 @@ def per_sample_mpke(
     Returns an array of shape (N,) where each entry is one sample's mean error
     across its keypoints.
     """
-    errors = per_sample_per_keypoint_error(
+    errors = keypoint_errors(
         predicted, ground_truth, num_keypoints=num_keypoints
     )
     return errors.mean(axis=1)
 
 
-def mpke_distribution_summary(
+def mpke_distribution(
     predicted: np.ndarray,
     ground_truth: np.ndarray,
     *,
@@ -101,7 +101,7 @@ def mpke_distribution_summary(
     the best, median-like, p90-like, and worst samples for use in overlay
     figures.
     """
-    sample_errors = per_sample_mpke(
+    sample_errors = sample_mpke(
         predicted, ground_truth, num_keypoints=num_keypoints
     )
     summary: dict = {
@@ -147,10 +147,10 @@ def evaluate_model(
     all_targets = np.concatenate(targets, axis=0)
 
     return {
-        "mean_per_keypoint_error_px": mean_per_keypoint_error(
+        "mpke_px": mpke(
             all_predictions, all_targets, num_keypoints=num_keypoints
         ),
-        **mpke_distribution_summary(
+        **mpke_distribution(
             all_predictions,
             all_targets,
             num_keypoints=num_keypoints,
@@ -163,8 +163,8 @@ def evaluate_model(
 __all__ = [
     "DEFAULT_NUM_KEYPOINTS",
     "evaluate_model",
-    "mean_per_keypoint_error",
-    "mpke_distribution_summary",
-    "per_sample_mpke",
-    "per_sample_per_keypoint_error",
+    "keypoint_errors",
+    "mpke",
+    "mpke_distribution",
+    "sample_mpke",
 ]
