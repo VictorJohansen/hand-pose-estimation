@@ -97,6 +97,22 @@ Check that the evaluation set is visible:
 python -c "from src.data.freihand import FreiHand; dataset = FreiHand(split='eval'); dataset.validate(); print('Evaluation set visible')"
 ```
 
+## Training
+
+Train the baseline CNN from the project root:
+
+```bash
+python -m src.training.train_baseline --epochs 30 --batch-size 32 --learning-rate 1e-3
+```
+
+Each run writes to:
+
+- `models/<run_name>/best.keras` — best checkpoint by validation loss
+- `logs/<run_name>/history.json` — per-epoch training and validation metrics
+- `logs/<run_name>/config.json` — run hyperparameters
+
+`<run_name>` defaults to a timestamp; override with `--run-name`. Use `--limit-train` and `--limit-val` for fast smoke runs. Run `python -m src.training.train_baseline --help` for the full CLI.
+
 ## Notebooks
 
 - Open `notebooks/explore_dataset.ipynb` for a setup test and dataset visualization.
