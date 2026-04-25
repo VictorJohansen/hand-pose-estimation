@@ -116,3 +116,4 @@ Each run writes to:
 ## Notebooks
 
 - Open `notebooks/explore_dataset.ipynb` for a setup test and dataset visualization.
+- Open `notebooks/load_baseline.ipynb` to load the latest trained baseline checkpoint, verify the save/load round-trip, and see prediction overlays on validation samples.
