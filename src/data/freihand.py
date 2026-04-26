@@ -285,6 +285,11 @@ class FreiHand:
             keypoints = keypoints.reshape((keypoints.shape[0], -1))
 
         dataset = tf.data.Dataset.from_tensor_slices((np.asarray(image_paths, dtype=np.str_), keypoints.astype(np.float32)))
+        # Shuffle path strings before decoding so the buffer holds tiny strings
+        # (a few MB) instead of decoded float32 image tensors (~17 GB for the
+        # full training set at 224x224x3 with buffer_size=N).
+        if shuffle:
+            dataset = dataset.shuffle(buffer_size=len(image_paths), seed=seed, reshuffle_each_iteration=True)
         dataset = dataset.map(
             lambda image_path, label: (
                 self._decode_image_tf(image_path, image_size, normalize_images),
@@ -292,8 +297,6 @@ class FreiHand:
             ),
             num_parallel_calls=tf.data.AUTOTUNE,
         )
-        if shuffle:
-            dataset = dataset.shuffle(buffer_size=len(image_paths), seed=seed, reshuffle_each_iteration=True)
         return dataset.batch(batch_size, drop_remainder=drop_remainder).prefetch(tf.data.AUTOTUNE)
 
     def train_validation_split(
