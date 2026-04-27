@@ -1,0 +1,24 @@
+{
+  "run_name": "improved_v1",
+  "split": {
+    "seed": 42,
+    "validation_fraction": 0.1
+  },
+  "input_size": 224,
+  "param_count": 754229,
+  "metrics": {
+    "mpke_px": 8.591124534606934,
+    "median_sample_mpke_px": 7.428327560424805,
+    "p75_sample_mpke_px": 10.451935768127441,
+    "p90_sample_mpke_px": 14.301908493041992,
+    "p95_sample_mpke_px": 17.360515594482422,
+    "max_sample_mpke_px": 52.44120407104492,
+    "representative_indices": {
+      "best": 2493,
+      "median": 2603,
+      "p90": 704,
+      "worst": 1465
+    },
+    "n_samples": 3256
+  }
+}

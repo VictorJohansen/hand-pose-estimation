@@ -11,6 +11,9 @@ models/*
 !models/.gitkeep
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/*/
+artifacts/*/*
+!artifacts/*/evaluation.json
 logs/*
 !logs/.gitkeep
 reports/figures/*

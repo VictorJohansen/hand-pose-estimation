@@ -13,3 +13,4 @@ DAT255 semester project for 2D hand keypoint estimation on the FreiHAND dataset.
 ## Project outputs
 
 - [Artifact and output locations](docs/artifact-locations.md)
+- [Experiment log](docs/experiment-log.md)
