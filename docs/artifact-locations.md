@@ -16,6 +16,10 @@ evaluation, and report generation stay reproducible.
   comparison plots. Regenerate the report figure set with
   `python -m src.evaluation.report_figures`.
 
+- `reports/result-summary.md`
+  Generated result tables for evaluated runs. Regenerate it with
+  `python -m src.evaluation.report_summary`.
+
 - `artifacts/`
   Evaluation outputs that are not final report figures, such as prediction
   CSV/JSON files, metric summaries, generated tables, and intermediate analysis
