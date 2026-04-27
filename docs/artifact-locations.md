@@ -13,7 +13,8 @@ evaluation, and report generation stay reproducible.
 
 - `reports/figures/`
   Report-ready figures such as training curves, prediction overlays, and
-  comparison plots.
+  comparison plots. Regenerate the report figure set with
+  `python -m src.evaluation.report_figures`.
 
 - `artifacts/`
   Evaluation outputs that are not final report figures, such as prediction
@@ -25,3 +26,6 @@ evaluation, and report generation stay reproducible.
 The directories are kept in Git with `.gitkeep` files, but generated contents
 inside them are ignored. Commit only small, intentional artifacts needed to
 understand or reproduce results in the final report.
+
+Intentional report figures use the `reports/figures/report_*` prefix and are
+allowed through `.gitignore` so they can be included with the report source.

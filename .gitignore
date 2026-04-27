@@ -18,6 +18,8 @@ logs/*
 !logs/.gitkeep
 reports/figures/*
 !reports/figures/.gitkeep
+!reports/figures/report_*.pdf
+!reports/figures/report_*.png
 
 # Python cache
 __pycache__/

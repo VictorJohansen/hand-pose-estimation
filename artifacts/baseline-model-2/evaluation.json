@@ -1,0 +1,25 @@
+{
+  "run_name": "baseline-model-2",
+  "model_id": "baseline-model-2",
+  "split": {
+    "seed": 42,
+    "validation_fraction": 0.1
+  },
+  "input_size": 224,
+  "param_count": 12990410,
+  "metrics": {
+    "mpke_px": 21.19268798828125,
+    "median_sample_mpke_px": 20.78207778930664,
+    "p75_sample_mpke_px": 24.372211456298828,
+    "p90_sample_mpke_px": 28.205562591552734,
+    "p95_sample_mpke_px": 30.612520217895508,
+    "max_sample_mpke_px": 66.52889251708984,
+    "representative_indices": {
+      "best": 1850,
+      "median": 1226,
+      "p90": 1972,
+      "worst": 2984
+    },
+    "n_samples": 3256
+  }
+}
