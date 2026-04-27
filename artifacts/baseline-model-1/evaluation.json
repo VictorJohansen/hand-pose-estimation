@@ -1,5 +1,6 @@
 {
-  "run_name": "baseline",
+  "run_name": "baseline-model-1",
+  "model_id": "baseline-model-1",
   "split": {
     "seed": 42,
     "validation_fraction": 0.1

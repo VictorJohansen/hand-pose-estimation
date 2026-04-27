@@ -43,8 +43,30 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("run_name")
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--input-size", type=int, default=224)
+    parser.add_argument("--input-size", type=int, default=None)
+    parser.add_argument(
+        "--limit-val",
+        type=int,
+        default=None,
+        help="Optional cap on validation samples for smoke checks.",
+    )
     return parser.parse_args()
+
+
+def _load_config(run_name: str) -> dict:
+    config_path = PROJECT_ROOT / "logs" / run_name / "config.json"
+    if not config_path.exists():
+        return {}
+    return json.loads(config_path.read_text())
+
+
+def _resolve_input_size(config: dict, override: int | None) -> int:
+    if override is not None:
+        return override
+    input_shape = config.get("input_shape")
+    if input_shape:
+        return int(input_shape[0])
+    return 224
 
 
 def main() -> None:
@@ -54,6 +76,9 @@ def main() -> None:
         datefmt="%H:%M:%S",
         level=logging.INFO,
     )
+
+    config = _load_config(args.run_name)
+    input_size = _resolve_input_size(config, args.input_size)
 
     checkpoint = MODELS_DIR / args.run_name / "best.keras"
     if not checkpoint.exists():
@@ -69,7 +94,7 @@ def main() -> None:
             "Heatmap output %s detected; wrapping with keypoint decoder.",
             model.output_shape,
         )
-        eval_model = wrap_with_keypoint_decoder(model, input_size=args.input_size)
+        eval_model = wrap_with_keypoint_decoder(model, input_size=input_size)
     else:
         eval_model = model
 
@@ -80,10 +105,12 @@ def main() -> None:
         validation_fraction=SPLIT_VALIDATION_FRACTION,
         seed=SPLIT_SEED,
     )
+    if args.limit_val is not None:
+        val_idx = val_idx[: args.limit_val]
     val_ds = dataset.tf_dataset(
         indices=val_idx,
         batch_size=args.batch_size,
-        image_size=(args.input_size, args.input_size),
+        image_size=(input_size, input_size),
         flatten_keypoints=True,
     )
 
@@ -92,11 +119,12 @@ def main() -> None:
 
     payload = {
         "run_name": args.run_name,
+        "model_id": config.get("model_id", config.get("model")),
         "split": {
             "seed": SPLIT_SEED,
             "validation_fraction": SPLIT_VALIDATION_FRACTION,
         },
-        "input_size": args.input_size,
+        "input_size": input_size,
         "param_count": param_count,
         "metrics": metrics,
     }

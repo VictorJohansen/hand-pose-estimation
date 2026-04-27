@@ -1,5 +1,6 @@
 {
-  "run_name": "improved_v1",
+  "run_name": "improved-model-1",
+  "model_id": "improved-model-1",
   "split": {
     "seed": 42,
     "validation_fraction": 0.1

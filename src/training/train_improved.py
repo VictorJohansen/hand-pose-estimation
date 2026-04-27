@@ -16,7 +16,6 @@ import argparse
 import json
 import logging
 import os
-from datetime import datetime
 from pathlib import Path
 
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
@@ -36,9 +35,10 @@ from src.models.improved_cnn import (
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODELS_DIR = PROJECT_ROOT / "models"
 LOGS_DIR = PROJECT_ROOT / "logs"
+IMPROVED_MODEL_1 = "improved-model-1"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Train the improved residual heatmap CNN on FreiHAND.",
     )
@@ -66,7 +66,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Override the default timestamp-based run name.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def configure_logging() -> None:
@@ -80,7 +80,7 @@ def configure_logging() -> None:
 def make_run_name(override: str | None) -> str:
     if override:
         return override
-    return f"improved_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    return IMPROVED_MODEL_1
 
 
 def build_datasets(
@@ -137,8 +137,8 @@ def build_datasets(
     return train_ds, val_ds, int(len(train_idx)), int(len(val_idx))
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
     configure_logging()
 
     keras.utils.set_random_seed(args.seed)
@@ -182,6 +182,7 @@ def main() -> None:
 
     config = {
         "run_name": run_name,
+        "model_id": IMPROVED_MODEL_1,
         "model": "residual_heatmap_cnn",
         "epochs": args.epochs,
         "batch_size": args.batch_size,

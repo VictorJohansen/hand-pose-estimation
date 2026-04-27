@@ -29,8 +29,9 @@ __pycache__/
 # Local scratch notebooks
 notebooks/cnn-regressor-test.ipynb
 
-# Used for training with external GPU
+# Local-only training notebooks
 notebooks/training_control.ipynb
+notebooks/train_model.ipynb
 
 # OS filer
 .DS_Store

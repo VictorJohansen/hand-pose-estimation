@@ -21,7 +21,7 @@ ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 
 DEFAULT_COLUMNS: tuple[tuple[str, str], ...] = (
     ("run_name", "Run"),
-    ("model", "Model"),
+    ("model_id", "Model ID"),
     ("representation", "Repr."),
     ("param_count", "Params"),
     ("mpke_px", "MPKE (px)"),
@@ -46,6 +46,7 @@ def load_run_summary(run_name: str) -> dict:
     evaluation = json.loads(eval_path.read_text())
     return {
         "run_name": run_name,
+        "model_id": config.get("model_id", config.get("model", "baseline-model-1")),
         "model": config.get("model", "baseline_cnn"),
         "representation": config.get("representation", "coordinate"),
         "epochs": config.get("epochs"),

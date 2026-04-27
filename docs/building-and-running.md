@@ -99,10 +99,17 @@ python -c "from src.data.freihand import FreiHand; dataset = FreiHand(split='eva
 
 ## Training
 
-Train the baseline CNN from the project root:
+Train a baseline CNN from the project root:
 
 ```bash
-python -m src.training.train_baseline --epochs 30 --batch-size 32 --learning-rate 1e-3
+python -m src.training.train_baseline --model-id baseline-model-1
+```
+
+Use `--model-id baseline-model-2` for the regularized coordinate-regression baseline.
+Train the improved heatmap model with:
+
+```bash
+python -m src.training.train_improved
 ```
 
 Each run writes to:
@@ -111,9 +118,11 @@ Each run writes to:
 - `logs/<run_name>/history.json` — per-epoch training and validation metrics
 - `logs/<run_name>/config.json` — run hyperparameters
 
-`<run_name>` defaults to a timestamp; override with `--run-name`. Use `--limit-train` and `--limit-val` for fast smoke runs. Run `python -m src.training.train_baseline --help` for the full CLI.
+`<run_name>` defaults to the model ID; override with `--run-name`. Use `--limit-train` and `--limit-val` for fast smoke runs. Run `python -m src.training.train_baseline --help` or `python -m src.training.train_improved --help` for the full CLI.
 
 ## Notebooks
 
 - Open `notebooks/explore_dataset.ipynb` for a setup test and dataset visualization.
-- Open `notebooks/load_baseline.ipynb` to load the latest trained baseline checkpoint, verify the save/load round-trip, and see prediction overlays on validation samples.
+- Open `notebooks/load_baseline.ipynb` to choose a baseline checkpoint, verify the save/load round-trip, and see prediction overlays on validation samples.
+- Open `notebooks/load_improved.ipynb` to choose an improved checkpoint and run the same verification flow.
+- Open `notebooks/compare_runs.ipynb` to compare recorded runs.
