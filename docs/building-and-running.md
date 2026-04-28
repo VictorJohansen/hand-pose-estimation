@@ -112,6 +112,10 @@ Train the improved heatmap model with:
 python -m src.training.train_improved
 ```
 
+By default this now creates a new augmented run named `improved-model-2`.
+Use `--disable-augmentation` if you want to reproduce the earlier non-augmented
+training protocol.
+
 Each run writes to:
 
 - `models/<run_name>/best.keras` — best checkpoint by validation loss
