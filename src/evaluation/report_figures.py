@@ -25,6 +25,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 from src.data.freihand import FreiHand, SPLIT_SEED, SPLIT_VALIDATION_FRACTION
 from src.evaluation.metrics import sample_mpke
@@ -140,11 +141,23 @@ def _load_keypoint_model(run_name: str, input_size: int) -> keras.Model:
     return model
 
 
+def _load_raw_model(run_name: str) -> keras.Model:
+    checkpoint = MODELS_DIR / run_name / "best.keras"
+    if not checkpoint.exists():
+        raise FileNotFoundError(f"Missing checkpoint: {checkpoint}")
+    return keras.models.load_model(str(checkpoint))
+
+
 def _normalize_keypoints(array: np.ndarray) -> np.ndarray:
     array = np.asarray(array, dtype=np.float32)
     if array.ndim == 2:
         array = array.reshape(array.shape[0], 21, 2)
     return array
+
+
+def _shape_text(shape) -> str:
+    values = [value for value in tuple(shape) if value is not None]
+    return " x ".join(str(value) for value in values)
 
 
 def _save_figure(
@@ -245,6 +258,157 @@ def plot_training_curves(run_names: Sequence[str]):
             ax.set_xlabel("epoch")
             ax.set_ylabel(metric)
             ax.legend(frameon=False, loc="best")
+    fig.tight_layout()
+    return fig
+
+
+def _architecture_steps(run_name: str, model: keras.Model) -> list[tuple[str, str, str]]:
+    if run_name == "baseline-model-1":
+        return [
+            ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#e9eef4"),
+            ("Conv block 1", "3x3 conv 32 + BN + ReLU\n224 x 224 x 32", "#d8e7f3"),
+            ("Conv block 2", "max pool, 3x3 conv 64 + BN + ReLU\n112 x 112 x 64", "#cdebdc"),
+            ("Conv block 3", "max pool, 3x3 conv 128 + BN + ReLU\n56 x 56 x 128", "#f7e1c3"),
+            ("Feature pooling", "max pool, global average pooling\n28 x 28 x 128 -> 128", "#ecd8ef"),
+            ("Coordinate head", f"dense 256 + dropout\n{_shape_text(model.output_shape[1:])} values = 21 x (x, y)", "#f4cccc"),
+        ]
+    if run_name == "improved-model-1":
+        return [
+            ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#e9eef4"),
+            ("Stride-2 stem", "3x3 conv 32 + BN + ReLU\n112 x 112 x 32", "#d8e7f3"),
+            ("Residual stage 1", "1 residual block, 32 channels\n112 x 112 x 32", "#cdebdc"),
+            ("Residual stage 2", "2 residual blocks, 64 channels\n56 x 56 x 64", "#f7e1c3"),
+            ("Residual stage 3", "2 residual blocks, 128 channels\n56 x 56 x 128", "#ecd8ef"),
+            ("Heatmap head", f"3x3 conv 64 + 1x1 conv 21\nraw output: {_shape_text(model.output_shape[1:])}", "#f4cccc"),
+        ]
+    return [
+        ("Input", _shape_text(model.input_shape[1:]), "#e9eef4"),
+        ("Saved Keras model", f"{len(model.layers)} layers", "#d8e7f3"),
+        ("Output", _shape_text(model.output_shape[1:]), "#f4cccc"),
+    ]
+
+
+def plot_model_architectures(summaries: Sequence[dict]):
+    models = {summary["run_name"]: _load_raw_model(summary["run_name"]) for summary in summaries}
+    max_steps = max(len(_architecture_steps(run_name, model)) for run_name, model in models.items())
+    fig, axes = plt.subplots(1, len(summaries), figsize=(5.25 * len(summaries), 1.05 * max_steps + 1.4), squeeze=False)
+
+    for ax, summary in zip(axes.flat, summaries):
+        run_name = summary["run_name"]
+        model = models[run_name]
+        steps = _architecture_steps(run_name, model)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, max_steps + 1.05)
+        ax.axis("off")
+        ax.set_title(
+            f"{summary['label']} ({run_name})\n"
+            f"{model.count_params():,} params | {_shape_text(model.input_shape[1:])} -> {_shape_text(model.output_shape[1:])}",
+            fontsize=10,
+            pad=10,
+        )
+
+        top = max_steps - 0.15
+        for index, (title, detail, color) in enumerate(steps):
+            y = top - index
+            box = FancyBboxPatch(
+                (0.08, y - 0.34),
+                0.84,
+                0.62,
+                boxstyle="round,pad=0.02,rounding_size=0.035",
+                linewidth=1.0,
+                edgecolor="#555555",
+                facecolor=color,
+            )
+            ax.add_patch(box)
+            ax.text(0.5, y + 0.05, title, ha="center", va="center", fontsize=9, fontweight="bold")
+            ax.text(0.5, y - 0.16, detail, ha="center", va="center", fontsize=7.5)
+            if index < len(steps) - 1:
+                ax.add_patch(
+                    FancyArrowPatch(
+                        (0.5, y - 0.37),
+                        (0.5, y - 0.67),
+                        arrowstyle="-|>",
+                        mutation_scale=10,
+                        linewidth=1.0,
+                        color="#555555",
+                    )
+                )
+
+        if run_name == "improved-model-1":
+            ax.text(
+                0.5,
+                0.15,
+                "Evaluation wraps the heatmap model with a decoder to recover 21 image-space keypoints.",
+                ha="center",
+                va="bottom",
+                fontsize=7.5,
+                color="#555555",
+            )
+
+    fig.tight_layout()
+    return fig
+
+
+def _parameter_groups(run_name: str, model: keras.Model) -> list[tuple[str, int]]:
+    def layer_params(*prefixes: str) -> int:
+        return int(sum(layer.count_params() for layer in model.layers if layer.name.startswith(prefixes)))
+
+    if run_name == "baseline-model-1":
+        return [
+            ("Conv block 1", layer_params("conv1", "bn1")),
+            ("Conv block 2", layer_params("conv2", "bn2")),
+            ("Conv block 3", layer_params("conv3", "bn3")),
+            ("Dense head", layer_params("dense_regression", "keypoint_coordinates")),
+        ]
+    if run_name == "improved-model-1":
+        return [
+            ("Stem", layer_params("stem")),
+            ("Stage 1 residual", layer_params("stage1")),
+            ("Stage 2 residual", layer_params("stage2")),
+            ("Stage 3 residual", layer_params("stage3")),
+            ("Heatmap head", layer_params("head", "heatmaps")),
+        ]
+
+    return [
+        (layer.name, int(layer.count_params()))
+        for layer in model.layers
+        if layer.count_params() > 0
+    ]
+
+
+def plot_model_parameter_breakdown(summaries: Sequence[dict]):
+    models = {summary["run_name"]: _load_raw_model(summary["run_name"]) for summary in summaries}
+    fig, axes = plt.subplots(len(summaries), 1, figsize=(8.6, 2.35 * len(summaries)), squeeze=False)
+    colors = ("#4c78a8", "#72b7b2", "#f58518", "#54a24b", "#b279a2", "#e45756")
+
+    for ax, summary in zip(axes.flat, summaries):
+        run_name = summary["run_name"]
+        model = models[run_name]
+        groups = [(name, count) for name, count in _parameter_groups(run_name, model) if count > 0]
+        names = [name for name, _ in groups]
+        counts = np.asarray([count for _, count in groups], dtype=np.float64)
+        y = np.arange(len(groups))
+
+        ax.barh(y, counts, color=[colors[index % len(colors)] for index in range(len(groups))])
+        ax.set_yticks(y, names)
+        ax.invert_yaxis()
+        ax.set_xlabel("parameters")
+        ax.set_title(f"{summary['label']}: parameter distribution ({model.count_params():,} total)")
+        ax.grid(axis="x", alpha=0.25)
+        ax.grid(axis="y", visible=False)
+
+        max_count = float(counts.max())
+        ax.set_xlim(0, max_count * 1.38)
+        for index, count in enumerate(counts):
+            percent = count / model.count_params() * 100.0
+            ax.text(
+                count + max_count * 0.025,
+                index,
+                f"{int(count):,} ({percent:.1f}%)",
+                va="center",
+                fontsize=8,
+            )
+
     fig.tight_layout()
     return fig
 
@@ -417,6 +581,16 @@ def main() -> None:
     generated += _save_figure(
         plot_training_curves(run_names),
         "report_training_curves",
+        output_dir=args.output_dir,
+    )
+    generated += _save_figure(
+        plot_model_architectures(summaries),
+        "report_model_architectures",
+        output_dir=args.output_dir,
+    )
+    generated += _save_figure(
+        plot_model_parameter_breakdown(summaries),
+        "report_model_parameter_breakdown",
         output_dir=args.output_dir,
     )
 
