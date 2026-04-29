@@ -118,6 +118,16 @@ metrics remain comparable across runs. To train on only the original images,
 pass `--train-variants gs`. To select a subset, pass a comma-separated list
 such as `--train-variants gs,hom`.
 
+The improved model also supports optional online augmentation. This is separate
+from the FreiHAND-provided image variants and applies random train-time affine
+and color changes before heatmap targets are encoded:
+
+```bash
+python -m src.training.train_improved \
+  --run-name improved-model-1-online-augmented \
+  --online-augmentation
+```
+
 Each run writes to:
 
 - `models/<run_name>/best.keras` — best checkpoint by validation loss

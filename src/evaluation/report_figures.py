@@ -43,12 +43,14 @@ RUN_LABELS = {
     "baseline-model-1": "Baseline 1",
     "baseline-model-2": "Baseline 2",
     "improved-model-1": "Improved 1",
+    "improved-model-1-online-augmented": "Improved 1 + online aug.",
 }
 
 RUN_COLORS = {
     "baseline-model-1": "#4c78a8",
     "baseline-model-2": "#f58518",
     "improved-model-1": "#54a24b",
+    "improved-model-1-online-augmented": "#b279a2",
 }
 
 SUMMARY_METRICS = (
@@ -262,8 +264,13 @@ def plot_training_curves(run_names: Sequence[str]):
     return fig
 
 
-def _architecture_steps(run_name: str, model: keras.Model) -> list[tuple[str, str, str]]:
-    if run_name == "baseline-model-1":
+def _model_id(summary: dict) -> str:
+    return str(summary["config"].get("model_id", summary["run_name"]))
+
+
+def _architecture_steps(summary: dict, model: keras.Model) -> list[tuple[str, str, str]]:
+    model_id = _model_id(summary)
+    if model_id == "baseline-model-1":
         return [
             ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#e9eef4"),
             ("Conv block 1", "3x3 conv 32 + BN + ReLU\n224 x 224 x 32", "#d8e7f3"),
@@ -272,7 +279,7 @@ def _architecture_steps(run_name: str, model: keras.Model) -> list[tuple[str, st
             ("Feature pooling", "max pool, global average pooling\n28 x 28 x 128 -> 128", "#ecd8ef"),
             ("Coordinate head", f"dense 256 + dropout\n{_shape_text(model.output_shape[1:])} values = 21 x (x, y)", "#f4cccc"),
         ]
-    if run_name == "improved-model-1":
+    if model_id == "improved-model-1":
         return [
             ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#e9eef4"),
             ("Stride-2 stem", "3x3 conv 32 + BN + ReLU\n112 x 112 x 32", "#d8e7f3"),
@@ -290,13 +297,13 @@ def _architecture_steps(run_name: str, model: keras.Model) -> list[tuple[str, st
 
 def plot_model_architectures(summaries: Sequence[dict]):
     models = {summary["run_name"]: _load_raw_model(summary["run_name"]) for summary in summaries}
-    max_steps = max(len(_architecture_steps(run_name, model)) for run_name, model in models.items())
+    max_steps = max(len(_architecture_steps(summary, models[summary["run_name"]])) for summary in summaries)
     fig, axes = plt.subplots(1, len(summaries), figsize=(5.25 * len(summaries), 1.05 * max_steps + 1.4), squeeze=False)
 
     for ax, summary in zip(axes.flat, summaries):
         run_name = summary["run_name"]
         model = models[run_name]
-        steps = _architecture_steps(run_name, model)
+        steps = _architecture_steps(summary, model)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, max_steps + 1.05)
         ax.axis("off")
@@ -334,7 +341,7 @@ def plot_model_architectures(summaries: Sequence[dict]):
                     )
                 )
 
-        if run_name == "improved-model-1":
+        if _model_id(summary) == "improved-model-1":
             ax.text(
                 0.5,
                 0.15,
@@ -349,18 +356,19 @@ def plot_model_architectures(summaries: Sequence[dict]):
     return fig
 
 
-def _parameter_groups(run_name: str, model: keras.Model) -> list[tuple[str, int]]:
+def _parameter_groups(summary: dict, model: keras.Model) -> list[tuple[str, int]]:
     def layer_params(*prefixes: str) -> int:
         return int(sum(layer.count_params() for layer in model.layers if layer.name.startswith(prefixes)))
 
-    if run_name == "baseline-model-1":
+    model_id = _model_id(summary)
+    if model_id == "baseline-model-1":
         return [
             ("Conv block 1", layer_params("conv1", "bn1")),
             ("Conv block 2", layer_params("conv2", "bn2")),
             ("Conv block 3", layer_params("conv3", "bn3")),
             ("Dense head", layer_params("dense_regression", "keypoint_coordinates")),
         ]
-    if run_name == "improved-model-1":
+    if model_id == "improved-model-1":
         return [
             ("Stem", layer_params("stem")),
             ("Stage 1 residual", layer_params("stage1")),
@@ -384,7 +392,7 @@ def plot_model_parameter_breakdown(summaries: Sequence[dict]):
     for ax, summary in zip(axes.flat, summaries):
         run_name = summary["run_name"]
         model = models[run_name]
-        groups = [(name, count) for name, count in _parameter_groups(run_name, model) if count > 0]
+        groups = [(name, count) for name, count in _parameter_groups(summary, model) if count > 0]
         names = [name for name, _ in groups]
         counts = np.asarray([count for _, count in groups], dtype=np.float64)
         y = np.arange(len(groups))

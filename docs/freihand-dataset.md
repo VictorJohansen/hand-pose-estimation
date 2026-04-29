@@ -11,6 +11,9 @@ variants.
 
 Training uses all four variants by default. Validation keeps the original `gs`
 variant so validation metrics are measured on the same image view across runs.
+Optional online augmentation is a separate training-time step for the improved
+model; it creates random transformed batches and does not add files to the
+dataset directory.
 
 The dataset provides `3960` evaluation samples.
 

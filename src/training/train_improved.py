@@ -23,6 +23,7 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 import keras
 import tensorflow as tf
 
+from src.data.augmentations import augment_image_and_keypoints, augmentation_config
 from src.data.freihand import FreiHand, SPLIT_SEED, SPLIT_VALIDATION_FRACTION
 from src.models.heatmaps import DEFAULT_SIGMA, keypoints_to_heatmaps
 from src.models.improved_cnn import (
@@ -49,6 +50,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--validation-fraction", type=float, default=SPLIT_VALIDATION_FRACTION)
     parser.add_argument("--seed", type=int, default=SPLIT_SEED)
     parser.add_argument("--heatmap-sigma", type=float, default=DEFAULT_SIGMA)
+    parser.add_argument(
+        "--online-augmentation",
+        action="store_true",
+        help=(
+            "Apply train-time random affine and color augmentation before "
+            "encoding heatmaps. Disabled by default so the published "
+            "improved-model-1 run remains reproducible."
+        ),
+    )
     parser.add_argument(
         "--limit-train",
         type=int,
@@ -114,19 +124,26 @@ def build_datasets(
         )
         return image, heatmap
 
-    train_ds = (
-        dataset.tf_dataset(
-            indices=train_idx,
-            variants=args.train_variants,
-            batch_size=args.batch_size,
-            image_size=image_size,
-            shuffle=True,
-            seed=args.seed,
-            flatten_keypoints=False,
+    def augment(image, keypoints):
+        return augment_image_and_keypoints(
+            image,
+            keypoints,
+            image_size=input_size,
         )
-        .map(encode, num_parallel_calls=tf.data.AUTOTUNE)
-        .prefetch(tf.data.AUTOTUNE)
+
+    train_ds = dataset.tf_dataset(
+        indices=train_idx,
+        variants=args.train_variants,
+        batch_size=args.batch_size,
+        image_size=image_size,
+        shuffle=True,
+        seed=args.seed,
+        flatten_keypoints=False,
     )
+    if args.online_augmentation:
+        train_ds = train_ds.map(augment, num_parallel_calls=tf.data.AUTOTUNE)
+    train_ds = train_ds.map(encode, num_parallel_calls=tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
+
     val_ds = (
         dataset.tf_dataset(
             indices=val_idx,
@@ -161,6 +178,7 @@ def main(argv: list[str] | None = None) -> None:
     logging.info("Run name: %s", run_name)
     logging.info("Train variants: %s", ", ".join(args.train_variants))
     logging.info("Validation variants: %s", ", ".join(args.val_variants))
+    logging.info("Online augmentation: %s", "enabled" if args.online_augmentation else "disabled")
     logging.info("Building datasets...")
     train_ds, val_ds, n_train, n_val = build_datasets(
         args, image_size, heatmap_size, args.heatmap_sigma,
@@ -207,6 +225,8 @@ def main(argv: list[str] | None = None) -> None:
         "representation": "heatmap",
         "heatmap_size": heatmap_size,
         "heatmap_sigma": args.heatmap_sigma,
+        "online_augmentation_enabled": args.online_augmentation,
+        "online_augmentation": augmentation_config() if args.online_augmentation else None,
         "loss": "mse",
         "metrics": ["mae"],
         "optimizer": "adam",
