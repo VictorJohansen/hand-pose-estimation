@@ -15,9 +15,10 @@ evaluation, and report generation stay reproducible.
   Catch-all figure output for notebooks and exploratory plots.
 
 - `reports/figures/`
-  Numbered PNG-only report figures named `figureX.png`, where `X` matches the
-  figure number used in the report. Regenerate these with
-  `python -m src.evaluation.report_figure_set`.
+  Numbered PNG-only report figures named for the report figure number.
+  Decimal figure numbers use underscores, such as `figure1_1.png`.
+  Regenerate these with
+  `python -m src.evaluation.report_figures`.
 
 - `reports/result-summary.md`
   Generated result tables for evaluated runs. Regenerate it with

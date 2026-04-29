@@ -1,41 +1,49 @@
 # Report figure generation
 
 Use `reports/figures/` for numbered figures intended for the project report.
-Files in that folder are PNG-only and named `figureX.png`, where `X` is the
-figure number used in the report text.
+Files in that folder are PNG-only and named for the figure number used in the
+report text. Decimal figure numbers use underscores, such as
+`figure1_1.png` for Figure 1.1.
 
 Use `reports/all-figures/` for exploratory notebook output and extra images.
 
 List the configured figures and descriptions:
 
 ```bash
-python -m src.evaluation.report_figure_set --list
+python -m src.evaluation.report_figures --list
 ```
 
 Generate the current numbered report figure set:
 
 ```bash
-python -m src.evaluation.report_figure_set
+python -m src.evaluation.report_figures \
+  baseline-model-1 improved-model-1 improved-model-1-online-augmented
 ```
 
 Generate only selected figures:
 
 ```bash
-python -m src.evaluation.report_figure_set 1 3 7
+python -m src.evaluation.report_figures \
+  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
+  --figures 1 1.2 5 8
 ```
 
-Generate with an explicit run set:
+Choose the dataset examples shown in `figure1_1.png`:
 
 ```bash
-python -m src.evaluation.report_figure_set \
-  --runs baseline-model-1 improved-model-1 improved-model-1-online-augmented
+python -m src.evaluation.report_figures \
+  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
+  --dataset-sample-ids 0 1 2 3
 ```
 
-Choose the dataset examples shown in `figure1.png`:
+Choose the FreiHAND and project-augmentation comparison sample:
 
 ```bash
-python -m src.evaluation.report_figure_set \
-  --dataset-samples 15550 28457 18199 6097
+python -m src.evaluation.report_figures \
+  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
+  --variant-comparison-sample-id 0 \
+  --freihand-variant auto \
+  --augmentation-seed 42
 ```
 
 The command writes PNG files to `reports/figures/` and refreshes
