@@ -8,17 +8,17 @@
   "input_size": 224,
   "param_count": 754229,
   "metrics": {
-    "mpke_px": 8.591124534606934,
-    "median_sample_mpke_px": 7.428327560424805,
-    "p75_sample_mpke_px": 10.451935768127441,
-    "p90_sample_mpke_px": 14.301908493041992,
-    "p95_sample_mpke_px": 17.360515594482422,
-    "max_sample_mpke_px": 52.44120407104492,
+    "mpke_px": 8.482645034790039,
+    "median_sample_mpke_px": 7.251946449279785,
+    "p75_sample_mpke_px": 10.398750305175781,
+    "p90_sample_mpke_px": 14.272793769836426,
+    "p95_sample_mpke_px": 17.769163131713867,
+    "max_sample_mpke_px": 53.668060302734375,
     "representative_indices": {
-      "best": 2493,
-      "median": 2603,
-      "p90": 704,
-      "worst": 1465
+      "best": 1394,
+      "median": 885,
+      "p90": 1803,
+      "worst": 2984
     },
     "n_samples": 3256
   }

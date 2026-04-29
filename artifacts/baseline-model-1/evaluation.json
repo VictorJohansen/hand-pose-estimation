@@ -8,16 +8,16 @@
   "input_size": 224,
   "param_count": 137962,
   "metrics": {
-    "mpke_px": 18.099241256713867,
-    "median_sample_mpke_px": 17.22201156616211,
-    "p75_sample_mpke_px": 21.537906646728516,
-    "p90_sample_mpke_px": 26.320396423339844,
-    "p95_sample_mpke_px": 30.056838989257812,
-    "max_sample_mpke_px": 75.98968505859375,
+    "mpke_px": 17.353002548217773,
+    "median_sample_mpke_px": 16.479026794433594,
+    "p75_sample_mpke_px": 20.69357681274414,
+    "p90_sample_mpke_px": 25.123626708984375,
+    "p95_sample_mpke_px": 28.06580352783203,
+    "max_sample_mpke_px": 65.94575500488281,
     "representative_indices": {
-      "best": 3089,
-      "median": 125,
-      "p90": 2135,
+      "best": 1152,
+      "median": 2270,
+      "p90": 2170,
       "worst": 2984
     },
     "n_samples": 3256

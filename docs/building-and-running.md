@@ -112,9 +112,21 @@ Train the improved heatmap model with:
 python -m src.training.train_improved
 ```
 
-By default this now creates a new augmented run named `improved-model-2`.
-Use `--disable-augmentation` if you want to reproduce the earlier non-augmented
-training protocol.
+Training uses all four FreiHAND training image variants by default:
+`gs`, `hom`, `sample`, and `auto`. Validation uses only `gs` so validation
+metrics remain comparable across runs. To train on only the original images,
+pass `--train-variants gs`. To select a subset, pass a comma-separated list
+such as `--train-variants gs,hom`.
+
+The improved model also supports optional online augmentation. This is separate
+from the FreiHAND-provided image variants and applies random train-time affine
+and color changes before heatmap targets are encoded:
+
+```bash
+python -m src.training.train_improved \
+  --run-name improved-model-1-online-augmented \
+  --online-augmentation
+```
 
 Each run writes to:
 

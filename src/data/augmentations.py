@@ -1,9 +1,4 @@
-"""Train-time image/keypoint augmentations for hand pose estimation.
-
-These helpers are intentionally conservative: they focus on small affine
-transforms and mild color jitter that usually improve generalization without
-changing the task semantics.
-"""
+"""Train-time image/keypoint augmentations for hand pose estimation."""
 
 from __future__ import annotations
 
@@ -63,16 +58,22 @@ def _compose_affine_transform(
     angle_radians: tf.Tensor,
     scale: tf.Tensor,
 ) -> tf.Tensor:
-    """Create a forward input->output transform around the image center."""
+    """Create a forward input-to-output transform around the image center."""
     center = (tf.cast(image_size, tf.float32) - 1.0) / 2.0
     to_center = _translation_matrix(-center, -center)
     from_center = _translation_matrix(center, center)
-    transform = _translation_matrix(tx, ty) @ from_center @ _rotation_matrix(angle_radians) @ _scale_matrix(scale) @ to_center
+    transform = (
+        _translation_matrix(tx, ty)
+        @ from_center
+        @ _rotation_matrix(angle_radians)
+        @ _scale_matrix(scale)
+        @ to_center
+    )
     return transform
 
 
 def _matrix_to_projective_vector(matrix: tf.Tensor) -> tf.Tensor:
-    """Convert a 3x3 affine matrix into the 8-value TensorFlow projective form."""
+    """Convert a 3x3 affine matrix into TensorFlow's 8-value transform form."""
     return tf.stack(
         [
             matrix[..., 0, 0],
@@ -88,16 +89,35 @@ def _matrix_to_projective_vector(matrix: tf.Tensor) -> tf.Tensor:
     )
 
 
-def _apply_affine_to_keypoints(keypoints: tf.Tensor, transform: tf.Tensor, image_size: int) -> tf.Tensor:
+def _apply_affine_to_keypoints(
+    keypoints: tf.Tensor,
+    transform: tf.Tensor,
+    image_size: int,
+) -> tf.Tensor:
     keypoints = tf.cast(keypoints, tf.float32)
     ones = tf.ones(tf.concat([tf.shape(keypoints)[:-1], [1]], axis=0), dtype=tf.float32)
-    homogenous = tf.concat([keypoints, ones], axis=-1)
-    transformed = tf.linalg.matmul(homogenous, transform, transpose_b=True)[..., :2]
+    homogeneous = tf.concat([keypoints, ones], axis=-1)
+    transformed = tf.linalg.matmul(homogeneous, transform, transpose_b=True)[..., :2]
 
     max_coord = tf.cast(image_size - 1, tf.float32)
     x = tf.clip_by_value(transformed[..., 0], 0.0, max_coord)
     y = tf.clip_by_value(transformed[..., 1], 0.0, max_coord)
     return tf.stack([x, y], axis=-1)
+
+
+def augmentation_config() -> dict[str, float]:
+    """Return the default online augmentation parameters for run configs."""
+    return {
+        "max_translation_fraction": DEFAULT_MAX_TRANSLATION_FRACTION,
+        "max_rotation_degrees": DEFAULT_MAX_ROTATION_DEGREES,
+        "scale_min": DEFAULT_SCALE_MIN,
+        "scale_max": DEFAULT_SCALE_MAX,
+        "brightness_delta": DEFAULT_BRIGHTNESS_DELTA,
+        "contrast_min": DEFAULT_CONTRAST_MIN,
+        "contrast_max": DEFAULT_CONTRAST_MAX,
+        "saturation_min": DEFAULT_SATURATION_MIN,
+        "saturation_max": DEFAULT_SATURATION_MAX,
+    }
 
 
 def augment_image_and_keypoints(
@@ -115,11 +135,7 @@ def augment_image_and_keypoints(
     saturation_min: float = DEFAULT_SATURATION_MIN,
     saturation_max: float = DEFAULT_SATURATION_MAX,
 ) -> tuple[tf.Tensor, tf.Tensor]:
-    """Apply conservative train-time augmentation to one image/keypoint pair.
-
-    Geometric transforms are shared between the image and its labels. Mild
-    photometric transforms are then applied only to the image.
-    """
+    """Apply conservative train-time augmentation to image/keypoint tensors."""
     image = tf.cast(image, tf.float32)
     keypoints = tf.cast(keypoints, tf.float32)
     is_unbatched = image.shape.rank == 3
@@ -133,7 +149,8 @@ def augment_image_and_keypoints(
     max_translation_pixels = tf.cast(image_size, tf.float32) * tf.cast(max_translation_fraction, tf.float32)
     tx = tf.random.uniform([batch_size], -max_translation_pixels, max_translation_pixels)
     ty = tf.random.uniform([batch_size], -max_translation_pixels, max_translation_pixels)
-    angle_radians = tf.random.uniform([batch_size], -max_rotation_degrees, max_rotation_degrees) * (math.pi / 180.0)
+    angle_radians = tf.random.uniform([batch_size], -max_rotation_degrees, max_rotation_degrees)
+    angle_radians = angle_radians * (math.pi / 180.0)
     scale = tf.random.uniform([batch_size], scale_min, scale_max)
 
     forward_transform = _compose_affine_transform(
@@ -177,5 +194,6 @@ __all__ = [
     "DEFAULT_SATURATION_MIN",
     "DEFAULT_SCALE_MAX",
     "DEFAULT_SCALE_MIN",
+    "augmentation_config",
     "augment_image_and_keypoints",
 ]

@@ -8,32 +8,28 @@ python -m src.evaluation.report_summary
 
 ## Final comparison
 
-| Run              | Model ID         | Repr.      | Params     | MPKE (px) | Median (px) | p90 (px) | p95 (px) | Max (px) |
-| ---------------- | ---------------- | ---------- | ---------- | --------- | ----------- | -------- | -------- | -------- |
-| baseline-model-1 | baseline-model-1 | coordinate | 137,962    | 18.10     | 17.22       | 26.32    | 30.06    | 75.99    |
-| baseline-model-2 | baseline-model-2 | coordinate | 12,990,410 | 21.19     | 20.78       | 28.21    | 30.61    | 66.53    |
-| improved-model-1 | improved-model-1 | heatmap    | 754,229    | 8.59      | 7.43        | 14.30    | 17.36    | 52.44    |
+| Run              | Model ID         | Repr.      | Params  | MPKE (px) | Median (px) | p90 (px) | p95 (px) | Max (px) |
+| ---------------- | ---------------- | ---------- | ------- | --------- | ----------- | -------- | -------- | -------- |
+| baseline-model-1 | baseline-model-1 | coordinate | 137,962 | 17.35     | 16.48       | 25.12    | 28.07    | 65.95    |
+| improved-model-1 | improved-model-1 | heatmap    | 754,229 | 8.48      | 7.25        | 14.27    | 17.77    | 53.67    |
 
 ## Ranked by MPKE
 
-| Rank | Run              | MPKE (px) | Median (px) | p95 (px) | Params     |
-| ---- | ---------------- | --------- | ----------- | -------- | ---------- |
-| 1    | improved-model-1 | 8.59      | 7.43        | 17.36    | 754,229    |
-| 2    | baseline-model-1 | 18.10     | 17.22       | 30.06    | 137,962    |
-| 3    | baseline-model-2 | 21.19     | 20.78       | 30.61    | 12,990,410 |
+| Rank | Run              | MPKE (px) | Median (px) | p95 (px) | Params  |
+| ---- | ---------------- | --------- | ----------- | -------- | ------- |
+| 1    | improved-model-1 | 8.48      | 7.25        | 17.77    | 754,229 |
+| 2    | baseline-model-1 | 17.35     | 16.48       | 28.07    | 137,962 |
 
 ## Relative to best MPKE
 
 | Run              | MPKE delta (px) | MPKE delta (%) | Param delta | Param ratio |
 | ---------------- | --------------- | -------------- | ----------- | ----------- |
-| baseline-model-1 | 9.51            | 110.67         | -616,267    | 0.18        |
-| baseline-model-2 | 12.60           | 146.68         | 12,236,181  | 17.22       |
+| baseline-model-1 | 8.87            | 104.57         | -616,267    | 0.18        |
 | improved-model-1 | 0.00            | 0.00           | 0           | 1.00        |
 
 ## Run metadata
 
-| Run              | Val samples | Repr.      | Epochs | Batch | LR     |
-| ---------------- | ----------- | ---------- | ------ | ----- | ------ |
-| baseline-model-1 | 3,256       | coordinate | 30     | 32    | 0.001  |
-| baseline-model-2 | 3,256       | coordinate | 30     | 32    | 0.0005 |
-| improved-model-1 | 3,256       | heatmap    | 30     | 32    | 0.001  |
+| Run              | Val samples | Repr.      | Epochs | Batch | LR    |
+| ---------------- | ----------- | ---------- | ------ | ----- | ----- |
+| baseline-model-1 | 3,256       | coordinate | 30     | 32    | 0.001 |
+| improved-model-1 | 3,256       | heatmap    | 30     | 32    | 0.001 |

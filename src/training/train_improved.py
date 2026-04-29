@@ -23,18 +23,6 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 import keras
 import tensorflow as tf
 
-from src.data.augmentations import (
-    DEFAULT_BRIGHTNESS_DELTA,
-    DEFAULT_CONTRAST_MAX,
-    DEFAULT_CONTRAST_MIN,
-    DEFAULT_MAX_ROTATION_DEGREES,
-    DEFAULT_MAX_TRANSLATION_FRACTION,
-    DEFAULT_SATURATION_MAX,
-    DEFAULT_SATURATION_MIN,
-    DEFAULT_SCALE_MAX,
-    DEFAULT_SCALE_MIN,
-    augment_image_and_keypoints,
-)
 from src.data.freihand import FreiHand, SPLIT_SEED, SPLIT_VALIDATION_FRACTION
 from src.models.heatmaps import DEFAULT_SIGMA, keypoints_to_heatmaps
 from src.models.improved_cnn import (
@@ -42,6 +30,7 @@ from src.models.improved_cnn import (
     DEFAULT_INPUT_SHAPE,
     build_improved_cnn,
 )
+from src.training.data_options import add_variant_args, variant_names
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -62,11 +51,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=SPLIT_SEED)
     parser.add_argument("--heatmap-sigma", type=float, default=DEFAULT_SIGMA)
     parser.add_argument(
-        "--disable-augmentation",
-        action="store_true",
-        help="Disable train-time image/keypoint augmentation for ablations.",
-    )
-    parser.add_argument(
         "--limit-train",
         type=int,
         default=None,
@@ -84,6 +68,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Override the default timestamp-based run name.",
     )
+    add_variant_args(parser)
     return parser.parse_args(argv)
 
 
@@ -130,38 +115,22 @@ def build_datasets(
         )
         return image, heatmap
 
-    def augment(image, keypoints):
-        # Keep augmentation train-only so validation remains a stable yardstick.
-        return augment_image_and_keypoints(
-            image,
-            keypoints,
-            image_size=input_size,
-            max_translation_fraction=DEFAULT_MAX_TRANSLATION_FRACTION,
-            max_rotation_degrees=DEFAULT_MAX_ROTATION_DEGREES,
-            scale_min=DEFAULT_SCALE_MIN,
-            scale_max=DEFAULT_SCALE_MAX,
-            brightness_delta=DEFAULT_BRIGHTNESS_DELTA,
-            contrast_min=DEFAULT_CONTRAST_MIN,
-            contrast_max=DEFAULT_CONTRAST_MAX,
-            saturation_min=DEFAULT_SATURATION_MIN,
-            saturation_max=DEFAULT_SATURATION_MAX,
+    train_ds = (
+        dataset.tf_dataset(
+            indices=train_idx,
+            batch_size=args.batch_size,
+            image_size=image_size,
+            shuffle=True,
+            seed=args.seed,
+            flatten_keypoints=False,
         )
-
-    train_ds = dataset.tf_dataset(
-        indices=train_idx,
-        batch_size=args.batch_size,
-        image_size=image_size,
-        shuffle=True,
-        seed=args.seed,
-        flatten_keypoints=False,
+        .map(encode, num_parallel_calls=tf.data.AUTOTUNE)
+        .prefetch(tf.data.AUTOTUNE)
     )
-    if not args.disable_augmentation:
-        train_ds = train_ds.map(augment, num_parallel_calls=tf.data.AUTOTUNE)
-    train_ds = train_ds.map(encode, num_parallel_calls=tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
-
     val_ds = (
         dataset.tf_dataset(
             indices=val_idx,
+            variants=args.val_variants,
             batch_size=args.batch_size,
             image_size=image_size,
             flatten_keypoints=False,
@@ -169,7 +138,9 @@ def build_datasets(
         .map(encode, num_parallel_calls=tf.data.AUTOTUNE)
         .prefetch(tf.data.AUTOTUNE)
     )
-    return train_ds, val_ds, int(len(train_idx)), int(len(val_idx))
+    n_train = int(len(train_idx) * len(args.train_variants))
+    n_val = int(len(val_idx) * len(args.val_variants))
+    return train_ds, val_ds, n_train, n_val
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -188,6 +159,9 @@ def main(argv: list[str] | None = None) -> None:
     heatmap_size = DEFAULT_HEATMAP_SIZE
 
     logging.info("Run name: %s", run_name)
+    logging.info("Train variants: %s", ", ".join(args.train_variants))
+    logging.info("Validation variants: %s", ", ".join(args.val_variants))
+    logging.info("Online augmentation: %s", "enabled" if args.online_augmentation else "disabled")
     logging.info("Building datasets...")
     train_ds, val_ds, n_train, n_val = build_datasets(
         args, image_size, heatmap_size, args.heatmap_sigma,
@@ -226,22 +200,14 @@ def main(argv: list[str] | None = None) -> None:
         "seed": args.seed,
         "n_train": n_train,
         "n_val": n_val,
+        "n_train_base_samples": n_train // len(args.train_variants),
+        "n_val_base_samples": n_val // len(args.val_variants),
+        "train_variants": variant_names(args.train_variants),
+        "val_variants": variant_names(args.val_variants),
         "input_shape": list(DEFAULT_INPUT_SHAPE),
         "representation": "heatmap",
         "heatmap_size": heatmap_size,
         "heatmap_sigma": args.heatmap_sigma,
-        "augmentation_enabled": not args.disable_augmentation,
-        "augmentation": {
-            "max_translation_fraction": DEFAULT_MAX_TRANSLATION_FRACTION,
-            "max_rotation_degrees": DEFAULT_MAX_ROTATION_DEGREES,
-            "scale_min": DEFAULT_SCALE_MIN,
-            "scale_max": DEFAULT_SCALE_MAX,
-            "brightness_delta": DEFAULT_BRIGHTNESS_DELTA,
-            "contrast_min": DEFAULT_CONTRAST_MIN,
-            "contrast_max": DEFAULT_CONTRAST_MAX,
-            "saturation_min": DEFAULT_SATURATION_MIN,
-            "saturation_max": DEFAULT_SATURATION_MAX,
-        },
         "loss": "mse",
         "metrics": ["mae"],
         "optimizer": "adam",
