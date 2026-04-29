@@ -28,6 +28,8 @@ def _metric(summary: dict, key: str) -> float:
 
 
 def _format_value(value) -> str:
+    if value is None:
+        return "—"
     if isinstance(value, float):
         if value != 0.0 and abs(value) < 0.01:
             return f"{value:.4g}"
@@ -79,7 +81,7 @@ def _ranking_table(summaries: Sequence[dict]) -> str:
     rows = [
         (
             rank,
-            summary["run_name"],
+            summary["display_name"],
             _metric(summary, "mpke_px"),
             _metric(summary, "median_sample_mpke_px"),
             _metric(summary, "p95_sample_mpke_px"),
@@ -88,7 +90,7 @@ def _ranking_table(summaries: Sequence[dict]) -> str:
         for rank, summary in enumerate(ranked, start=1)
     ]
     return _format_markdown_table(
-        ("Rank", "Run", "MPKE (px)", "Median (px)", "p95 (px)", "Params"),
+        ("Rank", "Model", "MPKE (px)", "Median (px)", "p95 (px)", "Params"),
         rows,
     )
 
@@ -103,7 +105,7 @@ def _relative_to_best_table(summaries: Sequence[dict]) -> str:
         params = int(summary["param_count"])
         rows.append(
             (
-                summary["run_name"],
+                summary["display_name"],
                 mpke - best_mpke,
                 (mpke - best_mpke) / best_mpke * 100.0,
                 params - best_params,
@@ -112,7 +114,7 @@ def _relative_to_best_table(summaries: Sequence[dict]) -> str:
         )
     return _format_markdown_table(
         (
-            "Run",
+            "Model",
             "MPKE delta (px)",
             "MPKE delta (%)",
             "Param delta",
@@ -128,7 +130,7 @@ def _split_table(summaries: Sequence[dict]) -> str:
         metrics = summary["metrics"]
         rows.append(
             (
-                summary["run_name"],
+                summary["display_name"],
                 int(metrics.get("n_samples", 0)),
                 summary["representation"],
                 summary.get("epochs", ""),
@@ -137,7 +139,7 @@ def _split_table(summaries: Sequence[dict]) -> str:
             )
         )
     return _format_markdown_table(
-        ("Run", "Val samples", "Repr.", "Epochs", "Batch", "LR"),
+        ("Model", "Val samples", "Repr.", "Epochs", "Batch", "LR"),
         rows,
     )
 

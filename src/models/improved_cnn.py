@@ -1,4 +1,4 @@
-"""Improved from-scratch CNN with residual blocks and a heatmap head."""
+"""Improved model CNN with residual blocks and a heatmap head."""
 
 from __future__ import annotations
 

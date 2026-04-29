@@ -5,7 +5,7 @@ each run. The resulting table is intended to be pasted into the report
 with minimal editing.
 
 Run from the project root:
-    python -m src.evaluation.comparison baseline improved_v1
+    python -m src.evaluation.comparison baseline-model improved-model
 """
 
 from __future__ import annotations
@@ -18,10 +18,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS_DIR = PROJECT_ROOT / "logs"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 
+MODEL_DISPLAY_NAMES = {
+    "baseline-model": "baseline model",
+    "regularized-baseline-model": "regularized baseline model",
+    "improved-model": "improved model",
+    "webcam-model": "webcam model",
+}
 
 DEFAULT_COLUMNS: tuple[tuple[str, str], ...] = (
-    ("run_name", "Run"),
-    ("model_id", "Model ID"),
+    ("display_name", "Model"),
     ("representation", "Repr."),
     ("param_count", "Params"),
     ("mpke_px", "MPKE (px)"),
@@ -32,23 +37,35 @@ DEFAULT_COLUMNS: tuple[tuple[str, str], ...] = (
 )
 
 
+def _infer_representation(model_id: str) -> str:
+    if model_id in {"improved-model", "webcam-model"}:
+        return "heatmap"
+    if model_id in {"baseline-model", "regularized-baseline-model"}:
+        return "coordinate"
+    return ""
+
+
 def load_run_summary(run_name: str) -> dict:
     config_path = LOGS_DIR / run_name / "config.json"
     eval_path = ARTIFACTS_DIR / run_name / "evaluation.json"
-    if not config_path.exists():
-        raise FileNotFoundError(f"Missing config for run '{run_name}': {config_path}")
     if not eval_path.exists():
         raise FileNotFoundError(
             f"Missing evaluation for run '{run_name}'. "
             f"Run `python -m src.evaluation.evaluate_run {run_name}` first."
         )
-    config = json.loads(config_path.read_text())
+    config = json.loads(config_path.read_text()) if config_path.exists() else {}
     evaluation = json.loads(eval_path.read_text())
+    display_name = MODEL_DISPLAY_NAMES.get(run_name, run_name)
+    model_id = config.get("model_id", evaluation.get("model_id", run_name))
     return {
         "run_name": run_name,
-        "model_id": config.get("model_id", config.get("model", "baseline-model-1")),
+        "display_name": display_name,
+        "model_id": model_id,
         "model": config.get("model", "baseline_cnn"),
-        "representation": config.get("representation", "coordinate"),
+        "representation": config.get(
+            "representation",
+            evaluation.get("representation", _infer_representation(model_id)),
+        ),
         "epochs": config.get("epochs"),
         "batch_size": config.get("batch_size"),
         "learning_rate": config.get("learning_rate"),
@@ -121,6 +138,7 @@ if __name__ == "__main__":
 
 __all__ = [
     "DEFAULT_COLUMNS",
+    "MODEL_DISPLAY_NAMES",
     "format_comparison_markdown",
     "load_run_summary",
 ]

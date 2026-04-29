@@ -1,13 +1,13 @@
-"""Improved residual-heatmap CNN training entry point.
+"""Improved model and webcam model training entry point.
 
 Run from the project root:
     python -m src.training.train_improved --epochs 30 --batch-size 32
 
-Mirrors `train_baseline.py` so both runs share the same split, optimizer,
-logging pattern, and artifact layout (`models/<run>/best.keras`,
-`logs/<run>/history.json`, `logs/<run>/config.json`). Differences from the
-baseline are limited to the model architecture and the heatmap target
-representation — they are recorded in `config.json` for the run.
+Mirrors `train_baseline.py` so the baseline model, improved model, and webcam
+model share the same split, optimizer, logging pattern, and artifact layout
+(`models/<run>/best.keras`, `logs/<run>/history.json`,
+`logs/<run>/config.json`). The webcam model is the improved model architecture
+trained with additional online augmentation.
 """
 
 from __future__ import annotations
@@ -37,12 +37,13 @@ from src.training.data_options import add_variant_args, variant_names
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODELS_DIR = PROJECT_ROOT / "models"
 LOGS_DIR = PROJECT_ROOT / "logs"
-IMPROVED_MODEL_1 = "improved-model-1"
+IMPROVED_MODEL = "improved-model"
+WEBCAM_MODEL = "webcam-model"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Train the improved residual heatmap CNN on FreiHAND.",
+        description="Train the improved model or webcam model on FreiHAND.",
     )
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=32)
@@ -56,7 +57,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "Apply train-time random affine and color augmentation before "
             "encoding heatmaps. Disabled by default so the published "
-            "improved-model-1 run remains reproducible."
+            "improved model run remains reproducible."
         ),
     )
     parser.add_argument(
@@ -89,10 +90,10 @@ def configure_logging() -> None:
     )
 
 
-def make_run_name(override: str | None) -> str:
+def make_run_name(override: str | None, *, online_augmentation: bool) -> str:
     if override:
         return override
-    return IMPROVED_MODEL_1
+    return WEBCAM_MODEL if online_augmentation else IMPROVED_MODEL
 
 
 def build_datasets(
@@ -166,7 +167,7 @@ def main(argv: list[str] | None = None) -> None:
 
     keras.utils.set_random_seed(args.seed)
 
-    run_name = make_run_name(args.run_name)
+    run_name = make_run_name(args.run_name, online_augmentation=args.online_augmentation)
     model_dir = MODELS_DIR / run_name
     log_dir = LOGS_DIR / run_name
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -185,7 +186,8 @@ def main(argv: list[str] | None = None) -> None:
     )
     logging.info("Train samples: %d  Val samples: %d", n_train, n_val)
 
-    logging.info("Building improved residual heatmap CNN...")
+    model_id = WEBCAM_MODEL if args.online_augmentation else IMPROVED_MODEL
+    logging.info("Building %s...", "webcam model" if args.online_augmentation else "improved model")
     model = build_improved_cnn(
         input_shape=DEFAULT_INPUT_SHAPE,
         heatmap_size=heatmap_size,
@@ -208,7 +210,7 @@ def main(argv: list[str] | None = None) -> None:
 
     config = {
         "run_name": run_name,
-        "model_id": IMPROVED_MODEL_1,
+        "model_id": model_id,
         "model": "residual_heatmap_cnn",
         "epochs": args.epochs,
         "batch_size": args.batch_size,

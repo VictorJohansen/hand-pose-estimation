@@ -9,19 +9,21 @@ data/*
 # Generated project outputs
 models/*
 !models/.gitkeep
+!models/webcam-model/
+models/webcam-model/*
+!models/webcam-model/best.keras
 artifacts/*
 !artifacts/.gitkeep
-!artifacts/*/
-artifacts/*/*
-!artifacts/*/evaluation.json
 logs/*
 !logs/.gitkeep
+
+reports/*
+!reports/all-figures/
 reports/all-figures/*
 !reports/all-figures/.gitkeep
-!reports/all-figures/report_*.pdf
-!reports/all-figures/report_*.png
+!reports/report-figures/
 reports/report-figures/*
-!reports/report-figures/figure*.png
+!reports/report-figures/.gitkeep
 
 # Python cache
 __pycache__/
@@ -37,7 +39,7 @@ notebooks/cnn-regressor-test.ipynb
 notebooks/training_control.ipynb
 notebooks/train_model.ipynb
 
-# OS filer
+# OS files
 .DS_Store
 Thumbs.db
 

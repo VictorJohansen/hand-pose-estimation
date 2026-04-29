@@ -1,4 +1,4 @@
-"""Baseline CNN regressors for 2D hand keypoint estimation."""
+"""Baseline model CNN regressors for 2D hand keypoint estimation."""
 
 from __future__ import annotations
 
@@ -7,18 +7,18 @@ from keras import layers
 
 DEFAULT_INPUT_SHAPE: tuple[int, int, int] = (224, 224, 3)
 DEFAULT_NUM_KEYPOINTS = 21
-BASELINE_MODEL_1 = "baseline-model-1"
-BASELINE_MODEL_2 = "baseline-model-2"
-BASELINE_MODEL_IDS = (BASELINE_MODEL_1, BASELINE_MODEL_2)
+BASELINE_MODEL = "baseline-model"
+REGULARIZED_BASELINE_MODEL = "regularized-baseline-model"
+BASELINE_MODEL_IDS = (BASELINE_MODEL, REGULARIZED_BASELINE_MODEL)
 
 
-def build_baseline_model_1(
+def build_baseline_model(
     input_shape: tuple[int, int, int] = DEFAULT_INPUT_SHAPE,
     num_keypoints: int = DEFAULT_NUM_KEYPOINTS,
 ) -> keras.Model:
-    """Build the simple coordinate-regression baseline.
+    """Build the simple coordinate-regression baseline model.
 
-    This matches the architecture used for the tracked baseline-model-1
+    This matches the architecture used for the tracked baseline-model
     evaluation artifact.
     """
     inputs = keras.Input(shape=input_shape, name="input_image")
@@ -49,14 +49,14 @@ def build_baseline_model_1(
         name="keypoint_coordinates",
     )(x)
 
-    return keras.Model(inputs, outputs, name=BASELINE_MODEL_1)
+    return keras.Model(inputs, outputs, name=BASELINE_MODEL)
 
 
-def build_baseline_model_2(
+def build_regularized_baseline_model(
     input_shape: tuple[int, int, int] = DEFAULT_INPUT_SHAPE,
     num_keypoints: int = DEFAULT_NUM_KEYPOINTS,
 ) -> keras.Model:
-    """Build the regularized coordinate-regression baseline.
+    """Build the regularized coordinate-regression baseline model.
 
     This standardizes Mikal's notebook baseline to the same 224x224 input
     protocol used by the other report models.
@@ -86,28 +86,28 @@ def build_baseline_model_2(
         name="keypoint_coordinates",
     )(x)
 
-    return keras.Model(inputs, outputs, name=BASELINE_MODEL_2)
+    return keras.Model(inputs, outputs, name=REGULARIZED_BASELINE_MODEL)
 
 
 def build_baseline_cnn(
     input_shape: tuple[int, int, int] = DEFAULT_INPUT_SHAPE,
     num_keypoints: int = DEFAULT_NUM_KEYPOINTS,
-    model_id: str = BASELINE_MODEL_1,
+    model_id: str = BASELINE_MODEL,
 ) -> keras.Model:
-    if model_id == BASELINE_MODEL_1:
-        return build_baseline_model_1(input_shape, num_keypoints)
-    if model_id == BASELINE_MODEL_2:
-        return build_baseline_model_2(input_shape, num_keypoints)
+    if model_id == BASELINE_MODEL:
+        return build_baseline_model(input_shape, num_keypoints)
+    if model_id == REGULARIZED_BASELINE_MODEL:
+        return build_regularized_baseline_model(input_shape, num_keypoints)
     raise ValueError(f"Unknown baseline model_id '{model_id}'. Expected one of {BASELINE_MODEL_IDS}.")
 
 
 __all__ = [
-    "BASELINE_MODEL_1",
-    "BASELINE_MODEL_2",
+    "BASELINE_MODEL",
     "BASELINE_MODEL_IDS",
     "DEFAULT_INPUT_SHAPE",
     "DEFAULT_NUM_KEYPOINTS",
+    "REGULARIZED_BASELINE_MODEL",
     "build_baseline_cnn",
-    "build_baseline_model_1",
-    "build_baseline_model_2",
+    "build_baseline_model",
+    "build_regularized_baseline_model",
 ]

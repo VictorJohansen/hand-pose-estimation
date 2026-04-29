@@ -1,7 +1,7 @@
-"""Baseline CNN training entry point.
+"""Baseline model training entry point.
 
 Run from the project root:
-    python -m src.training.train_baseline --model-id baseline-model-1
+    python -m src.training.train_baseline --model-id baseline-model
 """
 
 from __future__ import annotations
@@ -19,10 +19,10 @@ import tensorflow as tf
 
 from src.data.freihand import FreiHand, SPLIT_SEED, SPLIT_VALIDATION_FRACTION
 from src.models.baseline_cnn import (
-    BASELINE_MODEL_1,
-    BASELINE_MODEL_2,
+    BASELINE_MODEL,
     BASELINE_MODEL_IDS,
     DEFAULT_INPUT_SHAPE,
+    REGULARIZED_BASELINE_MODEL,
     build_baseline_cnn,
 )
 from src.training.data_options import add_variant_args, variant_names
@@ -32,20 +32,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODELS_DIR = PROJECT_ROOT / "models"
 LOGS_DIR = PROJECT_ROOT / "logs"
 DEFAULT_LEARNING_RATES = {
-    BASELINE_MODEL_1: 1e-3,
-    BASELINE_MODEL_2: 5e-4,
+    BASELINE_MODEL: 1e-3,
+    REGULARIZED_BASELINE_MODEL: 5e-4,
 }
 DEFAULT_EARLY_STOPPING_PATIENCE = {
-    BASELINE_MODEL_1: None,
-    BASELINE_MODEL_2: 3,
+    BASELINE_MODEL: None,
+    REGULARIZED_BASELINE_MODEL: 3,
 }
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Train the baseline CNN keypoint regressor on FreiHAND.",
+        description="Train the baseline model keypoint regressor on FreiHAND.",
     )
-    parser.add_argument("--model-id", choices=BASELINE_MODEL_IDS, default=BASELINE_MODEL_1)
+    parser.add_argument("--model-id", choices=BASELINE_MODEL_IDS, default=BASELINE_MODEL)
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=None)
@@ -56,8 +56,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=int,
         default=None,
         help=(
-            "Override early stopping patience. By default baseline-model-2 "
-            "uses patience 3 and baseline-model-1 does not use early stopping."
+            "Override early stopping patience. By default regularized-baseline-model "
+            "uses patience 3 and baseline-model does not use early stopping."
         ),
     )
     parser.add_argument(

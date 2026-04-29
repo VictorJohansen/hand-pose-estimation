@@ -1,8 +1,8 @@
 """Compute MPKE on the canonical validation split for a saved run.
 
 Persists the result to `artifacts/<run>/evaluation.json` so it can be
-referenced by `experiment-log.md` and by `src.evaluation.comparison`
-without rerunning evaluation.
+referenced by `src.evaluation.comparison` and the report summary without
+rerunning evaluation.
 
 Heatmap models are auto-detected by output rank and re-exposed as
 keypoint models with `wrap_with_keypoint_decoder` so the existing MPKE
@@ -87,6 +87,7 @@ def main() -> None:
     logging.info("Loading checkpoint %s", checkpoint)
     model = keras.models.load_model(str(checkpoint))
     param_count = int(model.count_params())
+    representation = "coordinate"
 
     if _is_heatmap_output(model.output_shape):
         from src.models.heatmaps import wrap_with_keypoint_decoder
@@ -95,6 +96,7 @@ def main() -> None:
             model.output_shape,
         )
         eval_model = wrap_with_keypoint_decoder(model, input_size=input_size)
+        representation = "heatmap"
     else:
         eval_model = model
 
@@ -119,7 +121,8 @@ def main() -> None:
 
     payload = {
         "run_name": args.run_name,
-        "model_id": config.get("model_id", config.get("model")),
+        "model_id": config.get("model_id", config.get("model", args.run_name)),
+        "representation": config.get("representation", representation),
         "split": {
             "seed": SPLIT_SEED,
             "validation_fraction": SPLIT_VALIDATION_FRACTION,

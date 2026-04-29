@@ -1,7 +1,7 @@
 """Generate numbered PNG figures for the hand pose project report.
 
 Run from the project root:
-    python -m src.evaluation.report_figures baseline-model-1 improved-model-1 improved-model-1-online-augmented
+    python -m src.evaluation.report_figures baseline-model improved-model webcam-model
 """
 
 from __future__ import annotations
@@ -37,6 +37,7 @@ from src.data.freihand import (
 )
 from src.evaluation.metrics import sample_mpke
 from src.evaluation.overlays import GT_COLOR, PRED_COLOR, plot_keypoints
+from src.evaluation.comparison import MODEL_DISPLAY_NAMES
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -44,30 +45,24 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "reports" / "report-figures"
-DEFAULT_CAPTION_OUTPUT = PROJECT_ROOT / "docs" / "report-figure-captions.md"
 
 DEFAULT_RUNS = (
-    "baseline-model-1",
-    "improved-model-1",
-    "improved-model-1-online-augmented",
+    "baseline-model",
+    "improved-model",
+    "webcam-model",
 )
-ARCHITECTURE_RUNS = ("baseline-model-1", "improved-model-1")
-QUALITATIVE_RUNS = ("baseline-model-1", "improved-model-1")
+ARCHITECTURE_RUNS = ("baseline-model", "improved-model")
+QUALITATIVE_RUNS = ("baseline-model", "improved-model")
 DEFAULT_IMAGE_SIZE = 224
 DEFAULT_DATASET_SAMPLE_IDS = (0, 1, 2, 3)
 
-RUN_LABELS = {
-    "baseline-model-1": "baseline",
-    "baseline-model-2": "baseline 2",
-    "improved-model-1": "improved",
-    "improved-model-1-online-augmented": "webcam",
-}
+RUN_LABELS = MODEL_DISPLAY_NAMES
 
 RUN_COLORS = {
-    "baseline-model-1": "#3b6ea8",
-    "baseline-model-2": "#9b6a2f",
-    "improved-model-1": "#2f8f5b",
-    "improved-model-1-online-augmented": "#7b5aa6",
+    "baseline-model": "#3b6ea8",
+    "regularized-baseline-model": "#9b6a2f",
+    "improved-model": "#2f8f5b",
+    "webcam-model": "#7b5aa6",
 }
 
 SUMMARY_METRICS = (
@@ -95,7 +90,6 @@ class FigureSpec:
     key: str
     label: str
     filename: str
-    description: str
     build: Callable[[FigureContext], plt.Figure]
 
 
@@ -432,7 +426,7 @@ def plot_training_curves(run_names: Sequence[str]) -> plt.Figure:
 
 def _architecture_steps(summary: dict, model: keras.Model) -> list[tuple[str, str, str]]:
     model_id = _model_id(summary)
-    if model_id == "baseline-model-1":
+    if model_id == "baseline-model":
         return [
             ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#eef2f5"),
             ("Conv block 1", "Conv2D 32, BatchNorm, ReLU\nMaxPool", "#dbe9f4"),
@@ -442,7 +436,7 @@ def _architecture_steps(summary: dict, model: keras.Model) -> list[tuple[str, st
             ("Dense head", "Dense 256, Dropout 0.3\nDense 42 linear", "#f3d4d1"),
             ("Output", "21 x (x, y) coordinates", "#eeeeee"),
         ]
-    if model_id == "improved-model-1":
+    if model_id == "improved-model":
         return [
             ("Input", f"{_shape_text(model.input_shape[1:])} RGB image", "#eef2f5"),
             ("Stride-2 stem", "Conv2D 32, BatchNorm, ReLU", "#dbe9f4"),
@@ -495,7 +489,7 @@ def plot_model_architecture(summary: dict) -> plt.Figure:
                 )
             )
 
-    if _model_id(summary) == "improved-model-1":
+    if _model_id(summary) == "improved-model":
         ax.text(
             0.5,
             0.05,
@@ -514,14 +508,14 @@ def _parameter_groups(summary: dict, model: keras.Model) -> list[tuple[str, int]
         return int(sum(layer.count_params() for layer in model.layers if layer.name.startswith(prefixes)))
 
     model_id = _model_id(summary)
-    if model_id == "baseline-model-1":
+    if model_id == "baseline-model":
         return [
             ("conv block 1", layer_params("conv1", "bn1")),
             ("conv block 2", layer_params("conv2", "bn2")),
             ("conv block 3", layer_params("conv3", "bn3")),
             ("dense head", layer_params("dense_regression", "keypoint_coordinates")),
         ]
-    if model_id == "improved-model-1":
+    if model_id == "improved-model":
         return [
             ("stem", layer_params("stem")),
             ("stage 1", layer_params("stage1")),
@@ -693,11 +687,11 @@ def generate_figure4(ctx: FigureContext) -> plt.Figure:
 
 
 def generate_figure5(ctx: FigureContext) -> plt.Figure:
-    return plot_model_architecture(_summary_for(ctx, "baseline-model-1"))
+    return plot_model_architecture(_summary_for(ctx, "baseline-model"))
 
 
 def generate_figure6(ctx: FigureContext) -> plt.Figure:
-    return plot_model_architecture(_summary_for(ctx, "improved-model-1"))
+    return plot_model_architecture(_summary_for(ctx, "improved-model"))
 
 
 def generate_figure7(ctx: FigureContext) -> plt.Figure:
@@ -728,77 +722,66 @@ FIGURES: tuple[FigureSpec, ...] = (
         key="1",
         label="Figure 1",
         filename="figure1.png",
-        description="FreiHAND sample with ground-truth 2D keypoints and skeleton links colored by distance from the wrist.",
         build=generate_figure1,
     ),
     FigureSpec(
         key="2",
         label="Figure 2",
         filename="figure2.png",
-        description="Four FreiHAND training images shown without overlays to illustrate dataset appearance and pose diversity.",
         build=generate_figure2,
     ),
     FigureSpec(
         key="3",
         label="Figure 3",
         filename="figure3.png",
-        description="A normal FreiHAND image compared with a FreiHAND-provided processed variant of the same sample.",
         build=generate_figure3,
     ),
     FigureSpec(
         key="4",
         label="Figure 4",
         filename="figure4.png",
-        description="A normal FreiHAND image compared with the project's deterministic online augmentation of the same sample.",
         build=generate_figure4,
     ),
     FigureSpec(
         key="5",
         label="Figure 5",
         filename="figure5.png",
-        description="Standalone architecture diagram for the baseline coordinate-regression CNN.",
         build=generate_figure5,
     ),
     FigureSpec(
         key="6",
         label="Figure 6",
         filename="figure6.png",
-        description="Standalone architecture diagram for the improved residual heatmap CNN.",
         build=generate_figure6,
     ),
     FigureSpec(
         key="7",
         label="Figure 7",
         filename="figure7.png",
-        description="Training and validation curves for the baseline, improved, and webcam runs.",
         build=generate_figure7,
     ),
     FigureSpec(
         key="8",
         label="Figure 8",
         filename="figure8.png",
-        description="Validation MPKE comparison for the baseline, improved, and webcam runs.",
         build=generate_figure8,
     ),
     FigureSpec(
         key="9",
         label="Figure 9",
         filename="figure9.png",
-        description="Median, p90, and p95 per-sample MPKE for the evaluated runs.",
         build=generate_figure9,
     ),
     FigureSpec(
         key="10",
         label="Figure 10",
         filename="figure10.png",
-        description="Verified parameter distribution for the two distinct model architectures.",
         build=generate_figure10,
     ),
     FigureSpec(
         key="11",
         label="Figure 11",
         filename="figure11.png",
-        description="Qualitative prediction overlays comparing baseline and improved model outputs against ground truth.",
         build=generate_figure11,
     ),
 )
@@ -849,39 +832,6 @@ def _build_context(args: argparse.Namespace) -> FigureContext:
     )
 
 
-def _caption_markdown(figures: Sequence[FigureSpec], output_dir: Path) -> str:
-    lines = [
-        "# Report figure captions",
-        "",
-        "Generated by `python -m src.evaluation.report_figures`.",
-        "",
-    ]
-    for figure in figures:
-        figure_path = output_dir / figure.filename
-        try:
-            display_path = figure_path.relative_to(PROJECT_ROOT)
-        except ValueError:
-            display_path = figure_path
-        lines.extend(
-            [
-                f"## {figure.label}",
-                "",
-                f"File: `{display_path}`",
-                "",
-                f"{figure.label}. {figure.description}",
-                "",
-            ]
-        )
-    return "\n".join(lines).rstrip() + "\n"
-
-
-def _write_caption_file(figures: Sequence[FigureSpec], output_dir: Path, caption_output: Path) -> None:
-    if not caption_output.is_absolute():
-        caption_output = PROJECT_ROOT / caption_output
-    caption_output.parent.mkdir(parents=True, exist_ok=True)
-    caption_output.write_text(_caption_markdown(figures, output_dir))
-
-
 def _clean_report_outputs(output_dir: Path) -> None:
     if not output_dir.exists():
         return
@@ -910,14 +860,8 @@ def parse_args() -> argparse.Namespace:
         help="Directory where numbered PNG figures are written.",
     )
     parser.add_argument(
-        "--caption-output",
-        type=Path,
-        default=DEFAULT_CAPTION_OUTPUT,
-        help="Markdown file that stores the figure descriptions.",
-    )
-    parser.add_argument(
         "--reference-run",
-        default="improved-model-1",
+        default="improved-model",
         help="Run whose representative validation samples define the qualitative overlay grid.",
     )
     parser.add_argument(
@@ -964,11 +908,6 @@ def parse_args() -> argparse.Namespace:
         help="PNG output resolution.",
     )
     parser.add_argument(
-        "--list",
-        action="store_true",
-        help="Print configured figure filenames and descriptions without generating files.",
-    )
-    parser.add_argument(
         "--no-clean",
         action="store_true",
         help="Do not delete existing figure*.png files before generating the full figure set.",
@@ -983,11 +922,6 @@ def main() -> None:
     except argparse.ArgumentTypeError as exc:
         raise SystemExit(str(exc)) from exc
 
-    if args.list:
-        for figure in selected:
-            print(f"{figure.label}: {figure.filename} - {figure.description}")
-        return
-
     output_dir = args.output_dir
     if not output_dir.is_absolute():
         output_dir = PROJECT_ROOT / output_dir
@@ -1000,8 +934,6 @@ def main() -> None:
     generated: list[Path] = []
     for figure in selected:
         generated.append(_save_figure(figure.build(ctx), figure.filename, output_dir=output_dir, dpi=args.dpi))
-
-    _write_caption_file(FIGURES, output_dir, args.caption_output)
 
     for path in generated:
         print(path.relative_to(PROJECT_ROOT))
