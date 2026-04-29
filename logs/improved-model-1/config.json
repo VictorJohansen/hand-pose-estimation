@@ -1,0 +1,36 @@
+{
+  "run_name": "improved-model-1",
+  "model_id": "improved-model-1",
+  "model": "residual_heatmap_cnn",
+  "epochs": 30,
+  "batch_size": 32,
+  "learning_rate": 0.001,
+  "validation_fraction": 0.1,
+  "seed": 42,
+  "n_train": 117216,
+  "n_val": 3256,
+  "n_train_base_samples": 29304,
+  "n_val_base_samples": 3256,
+  "train_variants": [
+    "gs",
+    "hom",
+    "sample",
+    "auto"
+  ],
+  "val_variants": [
+    "gs"
+  ],
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "representation": "heatmap",
+  "heatmap_size": 56,
+  "heatmap_sigma": 2.0,
+  "loss": "mse",
+  "metrics": [
+    "mae"
+  ],
+  "optimizer": "adam"
+}
