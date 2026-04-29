@@ -1,6 +1,6 @@
 # Report figure generation
 
-Use `report/figures/` for numbered figures intended for the project report.
+Use `reports/report-figures/` for numbered figures intended for the project report.
 Files in that folder are PNG-only and named for the figure number used in the
 report text, such as `figure1.png` for Figure 1.
 
@@ -45,5 +45,5 @@ python -m src.evaluation.report_figures \
   --augmentation-seed 42
 ```
 
-The command writes PNG files to `report/figures/` and refreshes
+The command writes PNG files to `reports/report-figures/` and refreshes
 `docs/report-figure-captions.md`.

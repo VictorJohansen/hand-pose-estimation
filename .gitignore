@@ -20,8 +20,8 @@ reports/all-figures/*
 !reports/all-figures/.gitkeep
 !reports/all-figures/report_*.pdf
 !reports/all-figures/report_*.png
-report/figures/*
-!report/figures/figure*.png
+reports/report-figures/*
+!reports/report-figures/figure*.png
 
 # Python cache
 __pycache__/

@@ -43,7 +43,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS_DIR = PROJECT_ROOT / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
-DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "report" / "figures"
+DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "reports" / "report-figures"
 DEFAULT_CAPTION_OUTPUT = PROJECT_ROOT / "docs" / "report-figure-captions.md"
 
 DEFAULT_RUNS = (
