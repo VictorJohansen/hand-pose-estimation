@@ -19,3 +19,4 @@ DAT255 semester project for 2D hand keypoint estimation on the FreiHAND dataset.
 ## Demo
 
 - [Webcam T-Rex game demo](docs/webcam-game-demo.md)
+- [Browser web deployment](docs/web-deployment.md)

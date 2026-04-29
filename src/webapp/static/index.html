@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hand Pose T-Rex</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="camera-panel" aria-label="Webcam hand pose">
+        <div class="panel-header">
+          <div>
+            <h1>Hand Pose T-Rex</h1>
+            <p id="modelStatus">Loading model status</p>
+          </div>
+          <div class="score-pill" id="gestureState">closed</div>
+        </div>
+
+        <div class="camera-stage">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="cameraCanvas" width="360" height="360"></canvas>
+        </div>
+
+        <div class="controls">
+          <button id="cameraButton" type="button">Camera</button>
+          <button id="calibrateButton" type="button">Calibrate</button>
+          <button id="resetButton" type="button">Reset</button>
+          <label class="threshold-control">
+            <span>Threshold</span>
+            <input id="thresholdSlider" type="range" min="0.5" max="3.5" step="0.05" value="1.55">
+            <output id="thresholdValue">1.55</output>
+          </label>
+        </div>
+      </section>
+
+      <section class="game-panel" aria-label="T-Rex runner game">
+        <div class="game-head">
+          <div>
+            <span class="metric-label">Score</span>
+            <strong id="scoreValue">0000</strong>
+          </div>
+          <div>
+            <span class="metric-label">Hand</span>
+            <strong id="openScoreValue">0.00</strong>
+          </div>
+        </div>
+        <canvas id="gameCanvas" width="760" height="360"></canvas>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
+

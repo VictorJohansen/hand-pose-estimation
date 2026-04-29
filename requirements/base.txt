@@ -3,5 +3,5 @@
 # Use Python 3.12 for the default local setup.
 numpy>=1.26,<3
 pillow>=10,<13
-tensorflow>=2.18,<2.21
+tensorflow>=2.18,<2.22
 keras>=3.8,<4
