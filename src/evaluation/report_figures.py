@@ -601,9 +601,8 @@ def _representative_positions(summary: dict) -> list[tuple[str, int]]:
             f"Run `python -m src.evaluation.evaluate_run {summary['run_name']}` first."
         )
     return [
-        ("easy", int(representative["best"])),
+        ("best", int(representative["best"])),
         ("typical", int(representative["median"])),
-        ("hard", int(representative["p90"])),
         ("worst", int(representative["worst"])),
     ]
 
@@ -1002,7 +1001,7 @@ def main() -> None:
     for figure in selected:
         generated.append(_save_figure(figure.build(ctx), figure.filename, output_dir=output_dir, dpi=args.dpi))
 
-    _write_caption_file(selected, output_dir, args.caption_output)
+    _write_caption_file(FIGURES, output_dir, args.caption_output)
 
     for path in generated:
         print(path.relative_to(PROJECT_ROOT))
