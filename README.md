@@ -2,7 +2,8 @@
 
 DAT255 semester project for 2D hand keypoint estimation on the FreiHAND
 dataset. The repository contains the code, the selected webcam model
-checkpoint, notebooks, and tooling needed to check results locally.
+checkpoint, notebooks, and tooling needed to check results and regenerate the
+report figures locally.
 
 ## Reproduction Path
 

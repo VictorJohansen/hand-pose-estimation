@@ -60,7 +60,6 @@ RUN_LABELS = MODEL_DISPLAY_NAMES
 
 RUN_COLORS = {
     "baseline-model": "#3b6ea8",
-    "regularized-baseline-model": "#9b6a2f",
     "improved-model": "#2f8f5b",
     "webcam-model": "#7b5aa6",
 }
@@ -839,6 +838,13 @@ def _clean_report_outputs(output_dir: Path) -> None:
         path.unlink()
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate numbered PNG report figures from saved hand pose runs.",
@@ -936,7 +942,7 @@ def main() -> None:
         generated.append(_save_figure(figure.build(ctx), figure.filename, output_dir=output_dir, dpi=args.dpi))
 
     for path in generated:
-        print(path.relative_to(PROJECT_ROOT))
+        print(_display_path(path))
 
 
 if __name__ == "__main__":

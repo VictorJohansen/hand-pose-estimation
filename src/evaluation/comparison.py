@@ -1,8 +1,8 @@
 """Compare two or more runs and emit a markdown comparison table.
 
-Reads `logs/<run>/config.json` and `artifacts/<run>/evaluation.json` for
-each run. The resulting table is intended to be pasted into the report
-with minimal editing.
+Reads `artifacts/<run>/evaluation.json` for each run and uses
+`logs/<run>/config.json` when it is available. The resulting table is intended
+to be pasted into the report with minimal editing.
 
 Run from the project root:
     python -m src.evaluation.comparison baseline-model improved-model
@@ -20,7 +20,6 @@ ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 
 MODEL_DISPLAY_NAMES = {
     "baseline-model": "baseline model",
-    "regularized-baseline-model": "regularized baseline model",
     "improved-model": "improved model",
     "webcam-model": "webcam model",
 }
@@ -40,7 +39,7 @@ DEFAULT_COLUMNS: tuple[tuple[str, str], ...] = (
 def _infer_representation(model_id: str) -> str:
     if model_id in {"improved-model", "webcam-model"}:
         return "heatmap"
-    if model_id in {"baseline-model", "regularized-baseline-model"}:
+    if model_id == "baseline-model":
         return "coordinate"
     return ""
 

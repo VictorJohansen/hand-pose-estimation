@@ -13,7 +13,6 @@ from typing import Sequence
 from src.evaluation.comparison import (
     ARTIFACTS_DIR,
     DEFAULT_COLUMNS,
-    LOGS_DIR,
     format_comparison_markdown,
     load_run_summary,
 )
@@ -62,16 +61,14 @@ def _format_markdown_table(headers: Sequence[str], rows: Sequence[Sequence]) -> 
 
 
 def discover_run_names() -> list[str]:
-    """Return evaluated run names that also have saved config files."""
-    run_names: list[str] = []
-    for evaluation_path in sorted(ARTIFACTS_DIR.glob("*/evaluation.json")):
-        run_name = evaluation_path.parent.name
-        if (LOGS_DIR / run_name / "config.json").exists():
-            run_names.append(run_name)
+    """Return run names with saved evaluation artifacts."""
+    run_names = [
+        evaluation_path.parent.name
+        for evaluation_path in sorted(ARTIFACTS_DIR.glob("*/evaluation.json"))
+    ]
     if not run_names:
         raise FileNotFoundError(
-            "No evaluated runs found. Expected artifacts/<run>/evaluation.json "
-            "and logs/<run>/config.json."
+            "No evaluated runs found. Expected artifacts/<run>/evaluation.json."
         )
     return run_names
 

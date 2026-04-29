@@ -8,8 +8,7 @@ from keras import layers
 DEFAULT_INPUT_SHAPE: tuple[int, int, int] = (224, 224, 3)
 DEFAULT_NUM_KEYPOINTS = 21
 BASELINE_MODEL = "baseline-model"
-REGULARIZED_BASELINE_MODEL = "regularized-baseline-model"
-BASELINE_MODEL_IDS = (BASELINE_MODEL, REGULARIZED_BASELINE_MODEL)
+BASELINE_MODEL_IDS = (BASELINE_MODEL,)
 
 
 def build_baseline_model(
@@ -52,43 +51,6 @@ def build_baseline_model(
     return keras.Model(inputs, outputs, name=BASELINE_MODEL)
 
 
-def build_regularized_baseline_model(
-    input_shape: tuple[int, int, int] = DEFAULT_INPUT_SHAPE,
-    num_keypoints: int = DEFAULT_NUM_KEYPOINTS,
-) -> keras.Model:
-    """Build the regularized coordinate-regression baseline model.
-
-    This standardizes Mikal's notebook baseline to the same 224x224 input
-    protocol used by the other report models.
-    """
-    inputs = keras.Input(shape=input_shape, name="input_image")
-
-    x = layers.Conv2D(32, 3, padding="same", activation="relu", name="block1_conv1")(inputs)
-    x = layers.BatchNormalization(name="block1_bn")(x)
-    x = layers.Conv2D(32, 3, padding="same", activation="relu", name="block1_conv2")(x)
-    x = layers.MaxPooling2D(name="block1_pool")(x)
-
-    x = layers.Conv2D(64, 3, padding="same", activation="relu", name="block2_conv1")(x)
-    x = layers.BatchNormalization(name="block2_bn")(x)
-    x = layers.Conv2D(64, 3, padding="same", activation="relu", name="block2_conv2")(x)
-    x = layers.MaxPooling2D(name="block2_pool")(x)
-
-    x = layers.Conv2D(128, 3, padding="same", activation="relu", name="block3_conv")(x)
-    x = layers.MaxPooling2D(name="block3_pool")(x)
-
-    x = layers.Flatten(name="flatten_spatial_features")(x)
-    x = layers.Dense(128, activation="relu", name="dense_regression")(x)
-    x = layers.Dropout(0.5, name="dropout_regularization")(x)
-
-    outputs = layers.Dense(
-        num_keypoints * 2,
-        activation="linear",
-        name="keypoint_coordinates",
-    )(x)
-
-    return keras.Model(inputs, outputs, name=REGULARIZED_BASELINE_MODEL)
-
-
 def build_baseline_cnn(
     input_shape: tuple[int, int, int] = DEFAULT_INPUT_SHAPE,
     num_keypoints: int = DEFAULT_NUM_KEYPOINTS,
@@ -96,8 +58,6 @@ def build_baseline_cnn(
 ) -> keras.Model:
     if model_id == BASELINE_MODEL:
         return build_baseline_model(input_shape, num_keypoints)
-    if model_id == REGULARIZED_BASELINE_MODEL:
-        return build_regularized_baseline_model(input_shape, num_keypoints)
     raise ValueError(f"Unknown baseline model_id '{model_id}'. Expected one of {BASELINE_MODEL_IDS}.")
 
 
@@ -106,8 +66,6 @@ __all__ = [
     "BASELINE_MODEL_IDS",
     "DEFAULT_INPUT_SHAPE",
     "DEFAULT_NUM_KEYPOINTS",
-    "REGULARIZED_BASELINE_MODEL",
     "build_baseline_cnn",
     "build_baseline_model",
-    "build_regularized_baseline_model",
 ]

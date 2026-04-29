@@ -1,12 +1,22 @@
 # Setup
 
-Use Python `3.12` from the repository root.
+Use Python `3.12` from the repository root. These commands target macOS,
+Linux, or WSL2 Ubuntu. Native Windows is not the recommended path for the full
+TensorFlow workflow; use WSL2 Ubuntu on Windows.
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+```
+
+If `python3.12` is not on `PATH`, install Python 3.12 for your OS and then
+rerun the same commands. With `uv`, the fallback is:
+
+```bash
+uv python install 3.12
+uv python find 3.12
 ```
 
 `requirements.txt` installs the default local development setup. The dependency
@@ -21,13 +31,16 @@ Place the FreiHAND dataset under:
 data/FreiHAND_pub_v2/
 ```
 
-Download and extract the training dataset:
+Download and extract the main FreiHAND archive:
 
 ```bash
 mkdir -p data/FreiHAND_pub_v2
 curl -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2.zip \
   -o /tmp/FreiHAND_pub_v2.zip
-unzip -q /tmp/FreiHAND_pub_v2.zip -d data/FreiHAND_pub_v2
+python - <<'PY'
+import zipfile
+zipfile.ZipFile('/tmp/FreiHAND_pub_v2.zip').extractall('data/FreiHAND_pub_v2')
+PY
 rm /tmp/FreiHAND_pub_v2.zip
 ```
 
@@ -36,8 +49,14 @@ Download and extract the public evaluation annotations into the same directory:
 ```bash
 curl -L https://lmb.informatik.uni-freiburg.de/data/freihand/FreiHAND_pub_v2_eval.zip \
   -o /tmp/FreiHAND_pub_v2_eval.zip
-unzip -qj /tmp/FreiHAND_pub_v2_eval.zip "*/evaluation_xyz.json" \
-  -d data/FreiHAND_pub_v2
+python - <<'PY'
+import zipfile
+
+with zipfile.ZipFile('/tmp/FreiHAND_pub_v2_eval.zip') as archive:
+    member = next(name for name in archive.namelist() if name.endswith('evaluation_xyz.json'))
+    with archive.open(member) as source, open('data/FreiHAND_pub_v2/evaluation_xyz.json', 'wb') as target:
+        target.write(source.read())
+PY
 rm /tmp/FreiHAND_pub_v2_eval.zip
 ```
 

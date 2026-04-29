@@ -22,7 +22,6 @@ from src.models.baseline_cnn import (
     BASELINE_MODEL,
     BASELINE_MODEL_IDS,
     DEFAULT_INPUT_SHAPE,
-    REGULARIZED_BASELINE_MODEL,
     build_baseline_cnn,
 )
 from src.training.data_options import add_variant_args, variant_names
@@ -33,11 +32,9 @@ MODELS_DIR = PROJECT_ROOT / "models"
 LOGS_DIR = PROJECT_ROOT / "logs"
 DEFAULT_LEARNING_RATES = {
     BASELINE_MODEL: 1e-3,
-    REGULARIZED_BASELINE_MODEL: 5e-4,
 }
 DEFAULT_EARLY_STOPPING_PATIENCE = {
     BASELINE_MODEL: None,
-    REGULARIZED_BASELINE_MODEL: 3,
 }
 
 
@@ -55,10 +52,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--early-stopping-patience",
         type=int,
         default=None,
-        help=(
-            "Override early stopping patience. By default regularized-baseline-model "
-            "uses patience 3 and baseline-model does not use early stopping."
-        ),
+        help="Override early stopping patience. Disabled by default.",
     )
     parser.add_argument(
         "--limit-train",

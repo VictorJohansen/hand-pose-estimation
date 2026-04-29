@@ -1,7 +1,7 @@
 # Training
 
-Retraining is optional for reproducing the report. The committed checkpoints are
-the default path for result regeneration.
+Retraining is optional for reproducing the report. The committed webcam model
+checkpoint is the default path for result regeneration.
 
 Train the baseline model:
 
