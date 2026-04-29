@@ -36,7 +36,6 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 
-DEFAULT_RUNS = ("baseline-model-1", "baseline-model-2", "improved-model-1")
 DEFAULT_DATASET_SAMPLES = (15550, 28457, 18199, 6097)
 
 RUN_LABELS = {
@@ -107,6 +106,21 @@ def _load_history(run_name: str) -> dict[str, list[float]]:
     if not history_path.exists():
         raise FileNotFoundError(f"Missing history: {history_path}")
     return _read_json(history_path)
+
+
+def discover_run_names() -> list[str]:
+    """Return evaluated run names that also have saved config files."""
+    run_names: list[str] = []
+    for evaluation_path in sorted(ARTIFACTS_DIR.glob("*/evaluation.json")):
+        run_name = evaluation_path.parent.name
+        if (LOGS_DIR / run_name / "config.json").exists():
+            run_names.append(run_name)
+    if not run_names:
+        raise FileNotFoundError(
+            "No evaluated runs found. Expected artifacts/<run>/evaluation.json "
+            "and logs/<run>/config.json."
+        )
+    return run_names
 
 
 def _is_heatmap_output(output_shape) -> bool:
@@ -349,8 +363,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "runs",
         nargs="*",
-        default=list(DEFAULT_RUNS),
-        help="Run names to include. Defaults to all recorded project runs.",
+        help="Run names to include. Defaults to all evaluated runs.",
     )
     parser.add_argument(
         "--output-dir",
@@ -382,7 +395,8 @@ def main() -> None:
     args = parse_args()
     _apply_report_style()
 
-    summaries = [_load_run_summary(run_name) for run_name in args.runs]
+    run_names = args.runs or discover_run_names()
+    summaries = [_load_run_summary(run_name) for run_name in run_names]
     generated: list[Path] = []
 
     generated += _save_figure(
@@ -401,7 +415,7 @@ def main() -> None:
         output_dir=args.output_dir,
     )
     generated += _save_figure(
-        plot_training_curves(args.runs),
+        plot_training_curves(run_names),
         "report_training_curves",
         output_dir=args.output_dir,
     )

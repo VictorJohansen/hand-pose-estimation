@@ -112,6 +112,12 @@ Train the improved heatmap model with:
 python -m src.training.train_improved
 ```
 
+Training uses all four FreiHAND training image variants by default:
+`gs`, `hom`, `sample`, and `auto`. Validation uses only `gs` so validation
+metrics remain comparable across runs. To train on only the original images,
+pass `--train-variants gs`. To select a subset, pass a comma-separated list
+such as `--train-variants gs,hom`.
+
 Each run writes to:
 
 - `models/<run_name>/best.keras` — best checkpoint by validation loss

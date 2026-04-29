@@ -6,8 +6,11 @@ The training annotations contain `32,560` unique samples.
 
 The folder `training/rgb/` contains `130,240` images. This is because each
 unique training sample is provided in `4` RGB versions with different
-post-processing. The same keypoint annotations is reused for these image
+post-processing. The same keypoint annotations are reused for these image
 variants.
+
+Training uses all four variants by default. Validation keeps the original `gs`
+variant so validation metrics are measured on the same image view across runs.
 
 The dataset provides `3960` evaluation samples.
 

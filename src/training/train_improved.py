@@ -30,6 +30,7 @@ from src.models.improved_cnn import (
     DEFAULT_INPUT_SHAPE,
     build_improved_cnn,
 )
+from src.training.data_options import add_variant_args, variant_names
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -66,6 +67,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Override the default timestamp-based run name.",
     )
+    add_variant_args(parser)
     return parser.parse_args(argv)
 
 
@@ -115,6 +117,7 @@ def build_datasets(
     train_ds = (
         dataset.tf_dataset(
             indices=train_idx,
+            variants=args.train_variants,
             batch_size=args.batch_size,
             image_size=image_size,
             shuffle=True,
@@ -127,6 +130,7 @@ def build_datasets(
     val_ds = (
         dataset.tf_dataset(
             indices=val_idx,
+            variants=args.val_variants,
             batch_size=args.batch_size,
             image_size=image_size,
             flatten_keypoints=False,
@@ -134,7 +138,9 @@ def build_datasets(
         .map(encode, num_parallel_calls=tf.data.AUTOTUNE)
         .prefetch(tf.data.AUTOTUNE)
     )
-    return train_ds, val_ds, int(len(train_idx)), int(len(val_idx))
+    n_train = int(len(train_idx) * len(args.train_variants))
+    n_val = int(len(val_idx) * len(args.val_variants))
+    return train_ds, val_ds, n_train, n_val
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -153,6 +159,8 @@ def main(argv: list[str] | None = None) -> None:
     heatmap_size = DEFAULT_HEATMAP_SIZE
 
     logging.info("Run name: %s", run_name)
+    logging.info("Train variants: %s", ", ".join(args.train_variants))
+    logging.info("Validation variants: %s", ", ".join(args.val_variants))
     logging.info("Building datasets...")
     train_ds, val_ds, n_train, n_val = build_datasets(
         args, image_size, heatmap_size, args.heatmap_sigma,
@@ -191,6 +199,10 @@ def main(argv: list[str] | None = None) -> None:
         "seed": args.seed,
         "n_train": n_train,
         "n_val": n_val,
+        "n_train_base_samples": n_train // len(args.train_variants),
+        "n_val_base_samples": n_val // len(args.val_variants),
+        "train_variants": variant_names(args.train_variants),
+        "val_variants": variant_names(args.val_variants),
         "input_shape": list(DEFAULT_INPUT_SHAPE),
         "representation": "heatmap",
         "heatmap_size": heatmap_size,
