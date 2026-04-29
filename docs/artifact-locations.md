@@ -14,10 +14,10 @@ evaluation, and report generation stay reproducible.
 - `reports/all-figures/`
   Catch-all figure output for notebooks and exploratory plots.
 
-- `reports/report-figures/`
-  Report-ready figures such as training curves, prediction overlays, and
-  comparison plots. Regenerate the report figure set with
-  `python -m src.evaluation.report_figures`.
+- `reports/figures/`
+  Numbered PNG-only report figures named `figureX.png`, where `X` matches the
+  figure number used in the report. Regenerate these with
+  `python -m src.evaluation.report_figure_set`.
 
 - `reports/result-summary.md`
   Generated result tables for evaluated runs. Regenerate it with
@@ -34,6 +34,6 @@ The directories are kept in Git with `.gitkeep` files, but generated contents
 inside them are ignored. Commit only small, intentional artifacts needed to
 understand or reproduce results in the final report.
 
-Intentional report figures use the `reports/report-figures/report_*` prefix
-and are allowed through `.gitignore` so they can be included with the report
-source.
+Intentional report figures use the `reports/figures/figure*.png` naming
+pattern and are allowed through `.gitignore` so they can be included with the
+report source.

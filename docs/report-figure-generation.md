@@ -1,37 +1,42 @@
 # Report figure generation
 
-Use `reports/report-figures/` for figures intended for the project report.
+Use `reports/figures/` for numbered figures intended for the project report.
+Files in that folder are PNG-only and named `figureX.png`, where `X` is the
+figure number used in the report text.
+
 Use `reports/all-figures/` for exploratory notebook output and extra images.
 
-Generate the current report figure set:
+List the configured figures and descriptions:
 
 ```bash
-python -m src.evaluation.report_figures \
-  baseline-model-1 improved-model-1 improved-model-1-online-augmented
+python -m src.evaluation.report_figure_set --list
 ```
 
-Generate to an explicit output folder:
+Generate the current numbered report figure set:
 
 ```bash
-python -m src.evaluation.report_figures \
-  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
-  --output-dir reports/report-figures
+python -m src.evaluation.report_figure_set
 ```
 
-Choose the dataset examples shown in `report_dataset_examples`:
+Generate only selected figures:
 
 ```bash
-python -m src.evaluation.report_figures \
-  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
+python -m src.evaluation.report_figure_set 1 3 7
+```
+
+Generate with an explicit run set:
+
+```bash
+python -m src.evaluation.report_figure_set \
+  --runs baseline-model-1 improved-model-1 improved-model-1-online-augmented
+```
+
+Choose the dataset examples shown in `figure1.png`:
+
+```bash
+python -m src.evaluation.report_figure_set \
   --dataset-samples 15550 28457 18199 6097
 ```
 
-Skip prediction overlays when only dataset and metric figures are needed:
-
-```bash
-python -m src.evaluation.report_figures \
-  baseline-model-1 improved-model-1 improved-model-1-online-augmented \
-  --skip-predictions
-```
-
-The command writes PNG and PDF versions for each generated figure.
+The command writes PNG files to `reports/figures/` and refreshes
+`docs/report-figure-captions.md`.
