@@ -16,10 +16,14 @@ artifacts/*/*
 !artifacts/*/evaluation.json
 logs/*
 !logs/.gitkeep
-reports/figures/*
-!reports/figures/.gitkeep
-!reports/figures/report_*.pdf
-!reports/figures/report_*.png
+reports/all-figures/*
+!reports/all-figures/.gitkeep
+!reports/all-figures/report_*.pdf
+!reports/all-figures/report_*.png
+reports/report-figures/*
+!reports/report-figures/.gitkeep
+!reports/report-figures/report_*.pdf
+!reports/report-figures/report_*.png
 
 # Python cache
 __pycache__/

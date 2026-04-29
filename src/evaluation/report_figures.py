@@ -29,13 +29,14 @@ from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 from src.data.freihand import FreiHand, SPLIT_SEED, SPLIT_VALIDATION_FRACTION
 from src.evaluation.metrics import sample_mpke
-from src.evaluation.overlays import DEFAULT_FIGURES_DIR, plot_keypoints
+from src.evaluation.overlays import plot_keypoints
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS_DIR = PROJECT_ROOT / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
+DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "reports" / "report-figures"
 
 DEFAULT_DATASET_SAMPLES = (15550, 28457, 18199, 6097)
 
@@ -540,7 +541,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=DEFAULT_FIGURES_DIR,
+        default=DEFAULT_REPORT_FIGURES_DIR,
         help="Directory where report figures are written.",
     )
     parser.add_argument(

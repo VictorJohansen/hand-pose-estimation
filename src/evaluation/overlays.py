@@ -18,7 +18,7 @@ from src.data.freihand import HAND_CONNECTIONS
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
+DEFAULT_FIGURES_DIR = PROJECT_ROOT / "reports" / "all-figures"
 
 GT_COLOR = "#00ff66"
 PRED_COLOR = "#ff3366"
@@ -110,7 +110,7 @@ def save_figure(
     output_dir: Path = DEFAULT_FIGURES_DIR,
     dpi: int = 150,
 ) -> Path:
-    """Save a figure to `reports/figures/<name>`. Defaults to `.png`."""
+    """Save a figure to `reports/all-figures/<name>`. Defaults to `.png`."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     target = output_dir / name

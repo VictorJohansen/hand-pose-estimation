@@ -11,7 +11,10 @@ evaluation, and report generation stay reproducible.
 - `logs/`
   Training logs, TensorBoard event files, and run histories.
 
-- `reports/figures/`
+- `reports/all-figures/`
+  Catch-all figure output for notebooks and exploratory plots.
+
+- `reports/report-figures/`
   Report-ready figures such as training curves, prediction overlays, and
   comparison plots. Regenerate the report figure set with
   `python -m src.evaluation.report_figures`.
@@ -31,5 +34,6 @@ The directories are kept in Git with `.gitkeep` files, but generated contents
 inside them are ignored. Commit only small, intentional artifacts needed to
 understand or reproduce results in the final report.
 
-Intentional report figures use the `reports/figures/report_*` prefix and are
-allowed through `.gitignore` so they can be included with the report source.
+Intentional report figures use the `reports/report-figures/report_*` prefix
+and are allowed through `.gitignore` so they can be included with the report
+source.
