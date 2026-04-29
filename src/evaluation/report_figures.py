@@ -305,7 +305,7 @@ def plot_gradient_dataset_sample(
 ) -> plt.Figure:
     sample = _load_sample(sample_id, variant, image_size=input_size)
     fig, ax = plt.subplots(figsize=(4.0, 4.0))
-    _format_image_axis(ax, sample.image, f"sample {sample_id}, {variant}")
+    _format_image_axis(ax, sample.image)
     _draw_gradient_keypoints(ax, sample.keypoints)
     fig.tight_layout(pad=0.05)
     return fig
@@ -320,7 +320,7 @@ def plot_dataset_image_row(
     fig, axes = plt.subplots(1, len(sample_ids), figsize=(2.25 * len(sample_ids), 2.35), squeeze=False)
     for ax, sample_id in zip(axes.flat, sample_ids):
         sample = _load_sample(int(sample_id), variant, image_size=input_size)
-        _format_image_axis(ax, sample.image, f"sample {int(sample_id)}")
+        _format_image_axis(ax, sample.image)
     fig.subplots_adjust(left=0.01, right=0.99, top=0.86, bottom=0.02, wspace=0.035)
     return fig
 
