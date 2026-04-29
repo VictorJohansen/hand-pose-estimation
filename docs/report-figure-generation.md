@@ -1,9 +1,8 @@
 # Report figure generation
 
-Use `reports/figures/` for numbered figures intended for the project report.
+Use `report/figures/` for numbered figures intended for the project report.
 Files in that folder are PNG-only and named for the figure number used in the
-report text. Decimal figure numbers use underscores, such as
-`figure1_1.png` for Figure 1.1.
+report text, such as `figure1.png` for Figure 1.
 
 Use `reports/all-figures/` for exploratory notebook output and extra images.
 
@@ -25,10 +24,10 @@ Generate only selected figures:
 ```bash
 python -m src.evaluation.report_figures \
   baseline-model-1 improved-model-1 improved-model-1-online-augmented \
-  --figures 1 1.2 5 8
+  --figures 1 2 8 11
 ```
 
-Choose the dataset examples shown in `figure1_1.png`:
+Choose the dataset examples shown in `figure2.png`:
 
 ```bash
 python -m src.evaluation.report_figures \
@@ -46,5 +45,5 @@ python -m src.evaluation.report_figures \
   --augmentation-seed 42
 ```
 
-The command writes PNG files to `reports/figures/` and refreshes
+The command writes PNG files to `report/figures/` and refreshes
 `docs/report-figure-captions.md`.

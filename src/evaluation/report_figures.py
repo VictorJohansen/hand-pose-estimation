@@ -43,7 +43,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS_DIR = PROJECT_ROOT / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
-DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
+DEFAULT_REPORT_FIGURES_DIR = PROJECT_ROOT / "report" / "figures"
 DEFAULT_CAPTION_OUTPUT = PROJECT_ROOT / "docs" / "report-figure-captions.md"
 
 DEFAULT_RUNS = (
@@ -673,11 +673,11 @@ def generate_figure1(ctx: FigureContext) -> plt.Figure:
     return plot_gradient_dataset_sample(ctx.figure1_sample_id, variant=ctx.figure1_variant)
 
 
-def generate_figure1_1(ctx: FigureContext) -> plt.Figure:
+def generate_figure2(ctx: FigureContext) -> plt.Figure:
     return plot_dataset_image_row(ctx.dataset_sample_ids, variant=ctx.figure1_variant)
 
 
-def generate_figure1_2(ctx: FigureContext) -> plt.Figure:
+def generate_figure3(ctx: FigureContext) -> plt.Figure:
     return plot_freihand_variant_comparison(
         ctx.variant_comparison_sample_id,
         normal_variant="gs",
@@ -685,7 +685,7 @@ def generate_figure1_2(ctx: FigureContext) -> plt.Figure:
     )
 
 
-def generate_figure1_3(ctx: FigureContext) -> plt.Figure:
+def generate_figure4(ctx: FigureContext) -> plt.Figure:
     return plot_project_augmentation_comparison(
         ctx.variant_comparison_sample_id,
         variant="gs",
@@ -693,31 +693,31 @@ def generate_figure1_3(ctx: FigureContext) -> plt.Figure:
     )
 
 
-def generate_figure2(ctx: FigureContext) -> plt.Figure:
+def generate_figure5(ctx: FigureContext) -> plt.Figure:
     return plot_model_architecture(_summary_for(ctx, "baseline-model-1"))
 
 
-def generate_figure3(ctx: FigureContext) -> plt.Figure:
+def generate_figure6(ctx: FigureContext) -> plt.Figure:
     return plot_model_architecture(_summary_for(ctx, "improved-model-1"))
 
 
-def generate_figure4(ctx: FigureContext) -> plt.Figure:
+def generate_figure7(ctx: FigureContext) -> plt.Figure:
     return plot_training_curves(ctx.run_names)
 
 
-def generate_figure5(ctx: FigureContext) -> plt.Figure:
+def generate_figure8(ctx: FigureContext) -> plt.Figure:
     return plot_validation_mpke(_summaries_for(ctx, ctx.run_names))
 
 
-def generate_figure6(ctx: FigureContext) -> plt.Figure:
+def generate_figure9(ctx: FigureContext) -> plt.Figure:
     return plot_mpke_distribution(_summaries_for(ctx, ctx.run_names))
 
 
-def generate_figure7(ctx: FigureContext) -> plt.Figure:
+def generate_figure10(ctx: FigureContext) -> plt.Figure:
     return plot_model_parameter_breakdown(_summaries_for(ctx, ARCHITECTURE_RUNS))
 
 
-def generate_figure8(ctx: FigureContext) -> plt.Figure:
+def generate_figure11(ctx: FigureContext) -> plt.Figure:
     return plot_prediction_comparison(
         _summaries_for(ctx, QUALITATIVE_RUNS),
         reference_run=ctx.reference_run,
@@ -733,74 +733,74 @@ FIGURES: tuple[FigureSpec, ...] = (
         build=generate_figure1,
     ),
     FigureSpec(
-        key="1_1",
-        label="Figure 1.1",
-        filename="figure1_1.png",
-        description="Four FreiHAND training images shown without overlays to illustrate dataset appearance and pose diversity.",
-        build=generate_figure1_1,
-    ),
-    FigureSpec(
-        key="1_2",
-        label="Figure 1.2",
-        filename="figure1_2.png",
-        description="A normal FreiHAND image compared with a FreiHAND-provided processed variant of the same sample.",
-        build=generate_figure1_2,
-    ),
-    FigureSpec(
-        key="1_3",
-        label="Figure 1.3",
-        filename="figure1_3.png",
-        description="A normal FreiHAND image compared with the project's deterministic online augmentation of the same sample.",
-        build=generate_figure1_3,
-    ),
-    FigureSpec(
         key="2",
         label="Figure 2",
         filename="figure2.png",
-        description="Standalone architecture diagram for the baseline coordinate-regression CNN.",
+        description="Four FreiHAND training images shown without overlays to illustrate dataset appearance and pose diversity.",
         build=generate_figure2,
     ),
     FigureSpec(
         key="3",
         label="Figure 3",
         filename="figure3.png",
-        description="Standalone architecture diagram for the improved residual heatmap CNN.",
+        description="A normal FreiHAND image compared with a FreiHAND-provided processed variant of the same sample.",
         build=generate_figure3,
     ),
     FigureSpec(
         key="4",
         label="Figure 4",
         filename="figure4.png",
-        description="Training and validation curves for the baseline, improved, and webcam runs.",
+        description="A normal FreiHAND image compared with the project's deterministic online augmentation of the same sample.",
         build=generate_figure4,
     ),
     FigureSpec(
         key="5",
         label="Figure 5",
         filename="figure5.png",
-        description="Validation MPKE comparison for the baseline, improved, and webcam runs.",
+        description="Standalone architecture diagram for the baseline coordinate-regression CNN.",
         build=generate_figure5,
     ),
     FigureSpec(
         key="6",
         label="Figure 6",
         filename="figure6.png",
-        description="Median, p90, and p95 per-sample MPKE for the evaluated runs.",
+        description="Standalone architecture diagram for the improved residual heatmap CNN.",
         build=generate_figure6,
     ),
     FigureSpec(
         key="7",
         label="Figure 7",
         filename="figure7.png",
-        description="Verified parameter distribution for the two distinct model architectures.",
+        description="Training and validation curves for the baseline, improved, and webcam runs.",
         build=generate_figure7,
     ),
     FigureSpec(
         key="8",
         label="Figure 8",
         filename="figure8.png",
-        description="Qualitative prediction overlays comparing baseline and improved model outputs against ground truth.",
+        description="Validation MPKE comparison for the baseline, improved, and webcam runs.",
         build=generate_figure8,
+    ),
+    FigureSpec(
+        key="9",
+        label="Figure 9",
+        filename="figure9.png",
+        description="Median, p90, and p95 per-sample MPKE for the evaluated runs.",
+        build=generate_figure9,
+    ),
+    FigureSpec(
+        key="10",
+        label="Figure 10",
+        filename="figure10.png",
+        description="Verified parameter distribution for the two distinct model architectures.",
+        build=generate_figure10,
+    ),
+    FigureSpec(
+        key="11",
+        label="Figure 11",
+        filename="figure11.png",
+        description="Qualitative prediction overlays comparing baseline and improved model outputs against ground truth.",
+        build=generate_figure11,
     ),
 )
 
@@ -902,7 +902,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--figures",
         nargs="+",
-        help="Figure numbers to generate, such as 1 1.2 5 8. Defaults to all figures.",
+        help="Figure numbers to generate, such as 1 2 8 11. Defaults to all figures.",
     )
     parser.add_argument(
         "--output-dir",
@@ -931,32 +931,32 @@ def parse_args() -> argparse.Namespace:
         "--figure1-variant",
         type=_validate_variant,
         default="gs",
-        help="FreiHAND variant used for figure1 and figure1_1.",
+        help="FreiHAND variant used for figure1 and figure2.",
     )
     parser.add_argument(
         "--dataset-sample-ids",
         type=int,
         nargs="+",
         default=list(DEFAULT_DATASET_SAMPLE_IDS),
-        help="FreiHAND sample IDs shown in figure1_1.",
+        help="FreiHAND sample IDs shown in figure2.",
     )
     parser.add_argument(
         "--variant-comparison-sample-id",
         type=int,
         default=0,
-        help="FreiHAND sample ID used for figure1_2 and figure1_3.",
+        help="FreiHAND sample ID used for figure3 and figure4.",
     )
     parser.add_argument(
         "--freihand-variant",
         type=_validate_variant,
         default="auto",
-        help="FreiHAND-provided variant used in figure1_2.",
+        help="FreiHAND-provided variant used in figure3.",
     )
     parser.add_argument(
         "--augmentation-seed",
         type=int,
         default=SPLIT_SEED,
-        help="Seed used for deterministic project augmentation in figure1_3.",
+        help="Seed used for deterministic project augmentation in figure4.",
     )
     parser.add_argument(
         "--dpi",

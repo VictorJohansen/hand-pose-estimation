@@ -14,9 +14,8 @@ evaluation, and report generation stay reproducible.
 - `reports/all-figures/`
   Catch-all figure output for notebooks and exploratory plots.
 
-- `reports/figures/`
+- `report/figures/`
   Numbered PNG-only report figures named for the report figure number.
-  Decimal figure numbers use underscores, such as `figure1_1.png`.
   Regenerate these with
   `python -m src.evaluation.report_figures`.
 
@@ -35,6 +34,6 @@ The directories are kept in Git with `.gitkeep` files, but generated contents
 inside them are ignored. Commit only small, intentional artifacts needed to
 understand or reproduce results in the final report.
 
-Intentional report figures use the `reports/figures/figure*.png` naming
+Intentional report figures use the `report/figures/figure*.png` naming
 pattern and are allowed through `.gitignore` so they can be included with the
 report source.
