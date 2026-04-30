@@ -1,0 +1,244 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7f4;
+  color: #1e2522;
+  --panel: #ffffff;
+  --line: #d4dad3;
+  --ink-soft: #5e6965;
+  --green: #2e8754;
+  --blue: #2f6fa3;
+  --red: #c7434b;
+  --gold: #d89c27;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f5f7f4;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(1220px, calc(100vw - 28px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 22px 0;
+  display: grid;
+  grid-template-columns: minmax(330px, 420px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.camera-panel,
+.game-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 34px rgba(38, 45, 42, 0.08);
+  overflow: hidden;
+}
+
+.camera-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  min-height: 88px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.35;
+  font-size: 0.9rem;
+}
+
+.gesture-badge {
+  min-width: 78px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: #f0f2f0;
+  color: var(--ink-soft);
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+}
+
+.gesture-badge.open {
+  background: #e3f4ea;
+  color: var(--green);
+}
+
+.camera-stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin: 18px;
+  background: #101614;
+  border: 1px solid #26302c;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#video {
+  display: none;
+}
+
+#cameraCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.status-grid {
+  margin: 0 18px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.status-grid div {
+  min-width: 0;
+  padding: 10px 11px;
+  border-right: 1px solid var(--line);
+}
+
+.status-grid div:last-child {
+  border-right: 0;
+}
+
+.status-grid span,
+.game-head span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.status-grid strong,
+.game-head strong {
+  display: block;
+  color: #1e2522;
+  font-size: 1rem;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  margin-top: auto;
+  padding: 14px 18px 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+button {
+  min-height: 38px;
+  border: 1px solid #bcc8c0;
+  border-radius: 8px;
+  background: #f8faf8;
+  color: #1e2522;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--green);
+}
+
+.range-control {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr) 46px;
+  gap: 9px;
+  align-items: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--green);
+}
+
+output {
+  text-align: right;
+  color: #1e2522;
+  font-weight: 700;
+}
+
+.game-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-head {
+  min-height: 64px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.game-head strong {
+  font-size: 1.35rem;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #f8faf7;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    width: min(650px, calc(100vw - 20px));
+    padding: 10px 0;
+  }
+
+  .panel-header,
+  .controls,
+  .game-head {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .camera-stage {
+    margin: 14px;
+  }
+
+  .status-grid {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+}

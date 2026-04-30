@@ -1,0 +1,6 @@
+# Deployment dependencies for the browser web app.
+-r base.txt
+
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+

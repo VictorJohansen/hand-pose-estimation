@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hand Pose Browser Demo</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="camera-panel" aria-label="Webcam hand pose">
+        <header class="panel-header">
+          <div>
+            <h1>Hand Pose Browser Demo</h1>
+            <p id="modelStatus">Loading model status</p>
+          </div>
+          <div class="gesture-badge" id="gestureState">closed</div>
+        </header>
+
+        <div class="camera-stage">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="cameraCanvas" width="640" height="480"></canvas>
+        </div>
+
+        <div class="status-grid">
+          <div>
+            <span>Detector</span>
+            <strong id="detectorStatus">loading</strong>
+          </div>
+          <div>
+            <span>Input</span>
+            <strong id="cropMode">full frame</strong>
+          </div>
+          <div>
+            <span>Open score</span>
+            <strong id="openScoreValue">0.00</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="cameraButton" type="button">Camera</button>
+          <button id="calibrateClosedButton" type="button">Closed</button>
+          <button id="calibrateOpenButton" type="button">Open</button>
+          <button id="resetButton" type="button">Reset</button>
+          <label class="range-control">
+            <span>Threshold</span>
+            <input id="thresholdSlider" type="range" min="0.5" max="3.5" step="0.05" value="1.55">
+            <output id="thresholdValue">1.55</output>
+          </label>
+        </div>
+      </section>
+
+      <section class="game-panel" aria-label="Runner game">
+        <header class="game-head">
+          <div>
+            <span>Score</span>
+            <strong id="scoreValue">0000</strong>
+          </div>
+          <div>
+            <span>State</span>
+            <strong id="gameState">ready</strong>
+          </div>
+        </header>
+        <canvas id="gameCanvas" width="760" height="360"></canvas>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

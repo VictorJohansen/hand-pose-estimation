@@ -38,6 +38,7 @@ python -m src.evaluation.report_summary webcam-model
 
 ## Web Deployment
 
-Web deployment is future work. The expected path is a small web app that loads a
-trained `.keras` checkpoint and runs image or webcam-frame inference. It is not
-required to reproduce the report results in this repository.
+The repository includes a small browser webcam demo backed by FastAPI. It loads
+the committed `models/webcam-model/best.keras` checkpoint by default.
+
+- [Run the web demo](docs/web-demo.md)
