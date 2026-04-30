@@ -3,5 +3,6 @@
 # Use Python 3.12 for the default local setup.
 numpy>=1.26,<3
 pillow>=10,<13
-tensorflow>=2.18,<2.21
-keras>=3.8,<4
+# Keep these pinned to the runtime used by the committed webcam checkpoint.
+tensorflow==2.20.0
+keras==3.14.0
